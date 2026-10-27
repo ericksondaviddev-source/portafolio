@@ -1,4 +1,5 @@
 import './style.css'
+import salas from './salas.js'
 import proyectos from './proyectos.js'
 import textos from './textos.js'
 
@@ -7,20 +8,23 @@ const CONFIG = {
   whatsappNumber: '584241875518' // Aprobado por Erickson 2026-10-24
 }
 
+const WA_BASE = `https://wa.me/${CONFIG.whatsappNumber}`
+const waHref = (mensaje) => `${WA_BASE}?text=${encodeURIComponent(mensaje)}`
+
 const app = document.getElementById('app')
 if (!app) throw new Error('app not found')
 
 let lang = localStorage.getItem('portafolio-lang') || 'es'
-let filter = localStorage.getItem('portafolio-filter') || 'todo'
 
 const tUI = () => textos[lang] || textos.es
-const tProj = (obj) => obj[lang] ?? obj.es ?? ''
+const t = (obj) => (obj && (obj[lang] ?? obj.es)) || ''
 
 function el(tag, attrs = {}, children = []) {
   const node = document.createElement(tag)
-  for (const [k,v] of Object.entries(attrs)) {
+  for (const [k, v] of Object.entries(attrs)) {
     if (k === 'class') node.className = v
     else if (k === 'text') node.textContent = v
+    else if (k === 'html') node.innerHTML = v
     else node.setAttribute(k, v)
   }
   for (const c of children) {
@@ -29,218 +33,349 @@ function el(tag, attrs = {}, children = []) {
   }
   return node
 }
-const clear = n => { while (n.firstChild) n.removeChild(n.firstChild) }
 
-const container = el('div', {class:'container'})
-app.appendChild(container)
+const clear = (n) => { while (n.firstChild) n.removeChild(n.firstChild) }
 
-// torch layer
-const torch = el('div', {id:'torch'})
+// ── Observadores únicos: se crean una vez y se reutilizan (nunca uno por render) ──
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+const cardObserver = 'IntersectionObserver' in window
+  ? new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in')
+          cardObserver.unobserve(e.target)
+        }
+      })
+    }, { threshold: 0.15 })
+  : null
+
+const sectionNodes = new Map()
+
+// ── Estructura ──
+const skip = el('a', { class: 'skip-link', href: '#content', 'data-i18n': 'skipToContent' })
+document.body.appendChild(skip)
+
+const torch = el('div', { id: 'torch' })
 document.body.appendChild(torch)
 
+const nav = el('nav', { class: 'nav', id: 'nav', 'aria-label': 'Portfolio', 'data-i18n-aria': 'navLabel' })
+const langBtn = el('button', { class: 'btn ghost', id: 'langBtn', type: 'button', 'data-i18n': 'langToggle' })
+
 const header = el('header', {}, [
-  el('div', {class:'logo', text:'ED-Dev'}),
-  el('span', {text: tUI().appTitle}),
-  el('div', {class:'lang'}, [
-    el('button', {class:'btn ghost', id:'langBtn', text: tUI().langToggle})
-  ])
+  el('div', { class: 'logo' }, [el('span', { text: 'ED-Dev' })]),
+  nav,
+  el('div', { class: 'lang' }, [langBtn])
 ])
-container.appendChild(header)
 
-const grid = el('div', {class:'grid'})
-container.appendChild(grid)
+const progress = el('div', { class: 'progress', role: 'progressbar', 'aria-label': 'Progreso', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': '0', 'data-i18n-aria': 'progressLabel' }, [
+  el('div', { class: 'progress-bar', id: 'progressBar' })
+])
 
-function buildHero() {
-  const hero = el('section', {class:'card hero bento-1'}, [
-    el('div', {}, [
-      el('h3', {id:'heroTitle', text: tUI().heroTitle}),
-      el('p', {id:'heroDesc', text: tUI().heroDesc})
-    ]),
-    el('div', {}, [
-      el('button', {class:'btn', id:'scrollBtn', text: tUI().heroBtn})
-    ])
-  ])
-  grid.appendChild(hero)
-}
+const main = el('main', { id: 'content' })
+const container = el('div', { class: 'container' }, [header, progress, main])
+app.appendChild(container)
 
-function buildFiltersCard() {
-  const card = el('section', {class:'card bento-2'}, [
-    el('h3', {text: tUI().filterTitle}),
-    el('div', {class:'filters', id:'filters'})
-  ])
-  grid.appendChild(card)
-  renderFilters()
-}
-
-function renderFilters() {
-  const wrap = document.getElementById('filters')
-  clear(wrap)
-  const keys = ['todo','landing','app','video','musica','libro']
-  for (const k of keys) {
-    const btn = el('button', {text: tUI().filters[k] || k})
-    if (filter === k) btn.classList.add('active')
-    btn.addEventListener('click', () => {
-      filter = k
-      localStorage.setItem('portafolio-filter', filter)
-      renderFilters()
-      renderProjects()
-    })
-    wrap.appendChild(btn)
-  }
-}
-
-function buildInfo() {
-  const info = el('section', {class:'card bento-3'}, [
-    el('h3', {text: tUI().styleTitle}),
-    el('p', {text: tUI().styleDesc})
-  ])
-  grid.appendChild(info)
-}
-
-function buildWhatsApp() {
-  const card = el('section', {class:'card bento-4'}, [
-    el('h3', {text: tUI().whatsappTitle}),
-    el('div', {class:'whatsapp'}, [
-      el('strong', {text: tUI().whatsappLabel})
-    ])
-  ])
-  grid.appendChild(card)
-}
-
-function buildArch() {
-  const card = el('section', {class:'card bento-5'}, [
-    el('h3', {text: tUI().archTitle}),
-    el('p', {text: tUI().archDesc})
-  ])
-  grid.appendChild(card)
-}
-
-function buildProjectsSection() {
-  const sec = el('section', {class:'card bento-6', id:'proyectos'}, [
-    el('h3', {id:'projectsTitle', text: tUI().projectsTitle}),
-    el('div', {class:'projects', id:'projects'})
-  ])
-  grid.appendChild(sec)
-  renderProjects()
-}
-
-const footer = el('footer', {id:'footer', text: tUI().footer})
+const footer = el('footer', { id: 'footer', 'data-i18n': 'footer' })
 container.appendChild(footer)
 
-const toast = el('div', {class:'copy-toast', id:'toast', text: tUI().toastCopy})
+const toast = el('div', { class: 'copy-toast', id: 'toast', role: 'status', 'aria-live': 'polite' })
 document.body.appendChild(toast)
 
+let toastTimer = null
 function showToast(msg) {
   toast.textContent = msg
   toast.classList.add('show')
-  setTimeout(()=> toast.classList.remove('show'), 1800)
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800)
 }
 
-function renderProjects() {
-  const wrap = document.getElementById('projects')
-  clear(wrap)
-  const items = proyectos.filter(p => filter === 'todo' || p.type === filter)
-  for (const p of items) {
-    const card = el('article', {class: 'project' + (p.destacado ? ' featured' : '')})
-    const body = el('div', {class:'project-body'})
-    const tag = el('span', {class:'tag', text: tUI().filters[p.type] || p.type})
-    const title = el('strong', {})
-    title.appendChild(document.createTextNode(tProj(p.title)))
-    const desc = el('p', {text: tProj(p.description)})
+// ── Tarjetas de proyecto ──
+// Un mismo proyecto puede vivir en varias salas (destacado + su propia sala),
+// así que guardamos TODOS sus actualizadores, no solo uno.
+const projectCards = new Map()
 
-    if (p.urlDemo) {
-      const demoBtn = el('a', {class:'btn secondary', href:p.urlDemo, target:'_blank', text: tUI().btnDemo})
-      body.appendChild(demoBtn)
-      body.appendChild(document.createElement('br'))
-    } else {
-      const demoSpan = el('span', {class:'btn secondary disabled', text: tUI().btnDemoSoon})
-      body.appendChild(demoSpan)
-      body.appendChild(document.createElement('br'))
+function buildProjectCard(p) {
+  const tag = el('span', { class: 'tag' })
+  const title = el('h3', { class: 'project-title' })
+  const desc = el('p', { class: 'project-desc' })
+  const soon = el('span', { class: 'tag soon' })
+
+  const demo = p.urlDemo
+    ? el('a', { class: 'btn secondary', href: p.urlDemo, target: '_blank', rel: 'noopener noreferrer' })
+    : el('span', { class: 'btn secondary disabled', 'aria-disabled': 'true' })
+
+  const copyBtn = el('button', { class: 'btn secondary', type: 'button' })
+  const waBtn = el('a', { class: 'btn', target: '_blank', rel: 'noopener noreferrer' })
+
+  const update = () => {
+    tag.textContent = tUI().typeLabels[p.type] || p.type
+    title.textContent = t(p.title)
+    desc.textContent = t(p.description)
+    soon.textContent = tUI().tagPronto
+    demo.textContent = p.urlDemo ? tUI().btnDemo : tUI().btnDemoSoon
+    copyBtn.textContent = tUI().btnCopy
+    waBtn.textContent = tUI().btnWhatsApp
+    waBtn.href = waHref(t(p.propuesta))
+  }
+  update()
+
+  copyBtn.addEventListener('click', async () => {
+    const ok = await copyText(t(p.propuesta))
+    showToast(ok ? tUI().toastCopy : tUI().toastCopyFail)
+  })
+
+  const card = el('article', { class: 'project' + (p.destacado ? ' featured' : ''), 'data-proyecto': p.id }, [
+    el('div', { class: 'project-body' }, [
+      el('div', { class: 'project-meta' }, [tag, p.estado === 'proximo' ? soon : null]),
+      title,
+      desc,
+      el('div', { class: 'actions' }, [demo, copyBtn, waBtn])
+    ])
+  ])
+
+  const updaters = projectCards.get(p.id) || []
+  updaters.push(update)
+  projectCards.set(p.id, updaters)
+  return card
+}
+
+async function copyText(texto) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(texto)
+      return true
     }
+    const ta = el('textarea', { class: 'visually-hidden' })
+    ta.value = texto
+    document.body.appendChild(ta)
+    ta.select()
+    const ok = document.execCommand('copy')
+    ta.remove()
+    return ok
+  } catch (e) {
+    return false
+  }
+}
 
-    const copyBtn = el('button', {class:'btn secondary', text: tUI().btnCopy})
-    copyBtn.style.marginTop = '8px'
+// ── Secciones (salas) ──
+function sectionHeader(sala, index, i18nKey) {
+  return el('div', { class: 'section-head' }, [
+    el('span', { class: 'section-index', text: String(index + 1).padStart(2, '0') }),
+    el('h2', { 'data-i18n': i18nKey, text: t(sala.titulo) }),
+    el('p', { class: 'section-summary', text: t(sala.resumen) })
+  ])
+}
+
+const sectionTitleKey = {
+  landings: 'landingsTitle',
+  apps: 'appsTitle',
+  musica: 'musicaTitle',
+  libros: 'librosTitle',
+  video: 'videoTitle',
+  contacto: 'contactoTitle'
+}
+
+function buildSala(sala, index) {
+  const sec = el('section', { class: 'sala', id: `sala-${sala.id}`, 'data-sala': sala.id, 'data-ambiente': sala.ambiente })
+
+  if (sala.id === 'home') {
+    sec.appendChild(el('div', { class: 'hero' }, [
+      el('h1', { 'data-i18n': 'heroTitle', text: tUI().heroTitle }),
+      el('p', { 'data-i18n': 'heroDesc', text: tUI().heroDesc }),
+      el('button', { class: 'btn', id: 'heroBtn', type: 'button', 'data-i18n': 'heroBtn' })
+    ]))
+    const destacados = proyectos.filter((p) => p.destacado)
+    sec.appendChild(el('div', { class: 'section-head' }, [
+      el('span', { class: 'section-index', text: '01' }),
+      el('h2', { 'data-i18n': 'featuredTitle', text: tUI().featuredTitle })
+    ]))
+    const grid = el('div', { class: 'projects' })
+    destacados.forEach((p) => grid.appendChild(buildProjectCard(p)))
+    sec.appendChild(grid)
+    return sec
+  }
+
+  sec.appendChild(sectionHeader(sala, index, sectionTitleKey[sala.id]))
+
+  if (sala.id === 'contacto') {
+    const copyBtn = el('button', { class: 'btn secondary', type: 'button', 'data-i18n': 'contactoCopy' })
     copyBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(tProj(p.textoPropuesta))
-        showToast(tUI().toastCopy)
-      } catch(e) {
-        showToast(tUI().toastCopyFail)
-      }
+      const ok = await copyText(t(tUI().contactoPropuesta))
+      showToast(ok ? tUI().toastCopy : tUI().toastCopyFail)
     })
-
-    // Enlace WhatsApp con número centralizado en CONFIG
-    const waHref = p.linkWhatsApp.replace(/wa\.me\/\d+/, `wa.me/${CONFIG.whatsappNumber}`)
-    const waBtn = el('a', {class:'btn', href: waHref, target:'_blank', text: tUI().btnWhatsApp})
-    waBtn.style.marginTop = '8px'
-
-    body.appendChild(tag)
-    body.appendChild(title)
-    body.appendChild(document.createElement('br'))
-    body.appendChild(desc)
-    body.appendChild(document.createElement('br'))
-    body.appendChild(copyBtn)
-    body.appendChild(document.createElement('br'))
-    body.appendChild(waBtn)
-
-    card.appendChild(body)
-    wrap.appendChild(card)
+    const waBtn = el('a', { class: 'btn wa-big', target: '_blank', rel: 'noopener noreferrer', 'data-i18n': 'contactoWhatsApp' })
+    sec.appendChild(el('div', { class: 'card contacto' }, [
+      el('p', { 'data-i18n': 'contactoDesc', text: tUI().contactoDesc }),
+      el('div', { class: 'actions' }, [waBtn, copyBtn]),
+      el('small', { class: 'muted', 'data-i18n': 'contactoHint', text: tUI().contactoHint })
+    ]))
+    return sec
   }
-  // intersection observer for entrance
-  if ('IntersectionObserver' in window) {
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('in')
-          obs.unobserve(e.target)
+
+  const items = proyectos.filter((p) => p.sala === sala.id)
+  if (items.length === 0) {
+    sec.appendChild(el('div', { class: 'card en-construccion' }, [
+      el('strong', { 'data-i18n': 'enConstruccionTitle', text: tUI().enConstruccionTitle }),
+      el('p', { 'data-i18n': 'enConstruccionDesc', text: tUI().enConstruccionDesc })
+    ]))
+    return sec
+  }
+
+  const grid = el('div', { class: 'projects' })
+  items.forEach((p) => grid.appendChild(buildProjectCard(p)))
+  sec.appendChild(grid)
+  return sec
+}
+
+// ── Navegación ──
+const navButtons = new Map()
+salas.forEach((sala) => {
+  const btn = el('button', { class: 'nav-btn', type: 'button', 'data-sala': sala.id })
+  btn.appendChild(el('span', { class: 'nav-label', text: t(sala.titulo) }))
+  btn.addEventListener('click', () => goToSala(sala.id))
+  nav.appendChild(btn)
+  navButtons.set(sala.id, btn)
+})
+
+function setActiveSala(id) {
+  navButtons.forEach((btn, key) => {
+    const active = key === id
+    btn.classList.toggle('active', active)
+    if (active) btn.setAttribute('aria-current', 'true')
+    else btn.removeAttribute('aria-current')
+  })
+}
+
+function goToSala(id) {
+  const target = document.getElementById(`sala-${id}`)
+  if (target) target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })
+}
+
+// ── Render ──
+salas.forEach((sala, i) => {
+  const sec = buildSala(sala, i)
+  main.appendChild(sec)
+  sectionNodes.set(sala.id, sec)
+})
+if (cardObserver) {
+  document.querySelectorAll('.project').forEach((c) => cardObserver.observe(c))
+} else {
+  document.querySelectorAll('.project').forEach((c) => c.classList.add('in'))
+}
+
+// ── Idioma: actualiza textos en sitio, sin recrear el DOM ──
+function applyLang() {
+  const ui = tUI()
+  document.documentElement.lang = lang
+  document.title = ui.pageTitle
+
+  document.querySelectorAll('[data-i18n]').forEach((node) => {
+    const value = ui[node.dataset.i18n]
+    if (typeof value === 'string') node.textContent = value
+  })
+  document.querySelectorAll('[data-i18n-aria]').forEach((node) => {
+    const value = ui[node.dataset.i18nAria]
+    if (typeof value === 'string') node.setAttribute('aria-label', value)
+  })
+
+  salas.forEach((sala) => {
+    const label = navButtons.get(sala.id)?.querySelector('.nav-label')
+    if (label) label.textContent = t(sala.titulo)
+    const resumen = document.querySelector(`#sala-${sala.id} .section-summary`)
+    if (resumen) resumen.textContent = t(sala.resumen)
+  })
+
+  projectCards.forEach((updaters) => updaters.forEach((update) => update()))
+
+  const waBtn = document.querySelector('.wa-big')
+  if (waBtn) waBtn.href = waHref(t(ui.contactoPropuesta))
+}
+
+applyLang()
+
+// ── Datos estructurados: se generan desde el catálogo, una sola fuente de verdad ──
+function renderJsonLd() {
+  const node = document.getElementById('ldjson')
+  if (!node) return
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'ED-Dev',
+    description: 'Diseño, tecnología y cultura. Solarpunk, bento grid y glassmorphism.',
+    knowsAbout: ['Diseño web', 'Desarrollo de apps', 'Video contenido', 'Identidad visual'],
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Portafolio ED-Dev',
+      itemListElement: proyectos.map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        item: {
+          '@type': 'CreativeWork',
+          name: t(p.title),
+          description: t(p.description),
+          url: p.urlDemo || undefined,
+          creator: { '@type': 'Person', name: 'ED-Dev' }
         }
-      })
-    }, {threshold:0.15})
-    document.querySelectorAll('.project').forEach(el => obs.observe(el))
+      }))
+    }
   }
+  node.textContent = JSON.stringify(data)
 }
+renderJsonLd()
 
-function updateLang() {
-  document.getElementById('langBtn').textContent = tUI().langToggle
-  document.getElementById('heroTitle').textContent = tUI().heroTitle
-  document.getElementById('heroDesc').textContent = tUI().heroDesc
-  document.getElementById('scrollBtn').textContent = tUI().heroBtn
-  document.getElementById('projectsTitle').textContent = tUI().projectsTitle
-  document.getElementById('footer').textContent = tUI().footer
-  toast.textContent = tUI().toastCopy
-  renderFilters()
-  renderProjects()
-}
-
-document.getElementById('langBtn').addEventListener('click', () => {
+langBtn.addEventListener('click', () => {
   lang = lang === 'es' ? 'en' : 'es'
   localStorage.setItem('portafolio-lang', lang)
-  updateLang()
+  applyLang()
+  renderJsonLd()
 })
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('scrollBtn')?.addEventListener('click', () => {
-    document.getElementById('proyectos')?.scrollIntoView({behavior:'smooth'})
-  })
-})
+const heroBtn = document.getElementById('heroBtn')
+if (heroBtn) heroBtn.addEventListener('click', () => goToSala('landings'))
 
-// torch cursor
-if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  let x = 0, y = 0
-  document.addEventListener('pointermove', e => { x = e.clientX; y = e.clientY; })
-  function tick() {
-    torch.style.setProperty('--x', x + 'px')
-    torch.style.setProperty('--y', y + 'px')
-    requestAnimationFrame(tick)
+// ── Progreso de scroll ──
+const progressBar = document.getElementById('progressBar')
+let scrollQueued = false
+function computeActiveSala() {
+  const line = window.scrollY + window.innerHeight * 0.35
+  let active = salas[0].id
+  for (const sala of salas) {
+    const sec = sectionNodes.get(sala.id)
+    if (sec && sec.offsetTop <= line) active = sala.id
   }
-  requestAnimationFrame(tick)
+  setActiveSala(active)
 }
+function updateProgress() {
+  scrollQueued = false
+  const doc = document.documentElement
+  const max = doc.scrollHeight - doc.clientHeight
+  const pct = max > 0 ? Math.min(100, Math.round((doc.scrollTop / max) * 100)) : 0
+  progressBar.style.transform = `scaleX(${pct / 100})`
+  progress.setAttribute('aria-valuenow', String(pct))
+  computeActiveSala()
+}
+window.addEventListener('scroll', () => {
+  if (scrollQueued) return
+  scrollQueued = true
+  requestAnimationFrame(updateProgress)
+}, { passive: true })
+updateProgress()
 
-// init
-buildHero()
-buildFiltersCard()
-buildInfo()
-buildWhatsApp()
-buildArch()
-buildProjectsSection()
-
+// ── Antorcha del cursor: se actualiza al mover el puntero, no en cada frame ──
+if (window.matchMedia('(pointer: fine)').matches && !reducedMotion) {
+  let px = window.innerWidth / 2
+  let py = window.innerHeight / 2
+  let queued = false
+  document.addEventListener('pointermove', (e) => {
+    px = e.clientX
+    py = e.clientY
+    if (queued) return
+    queued = true
+    requestAnimationFrame(() => {
+      queued = false
+      torch.style.setProperty('--x', px + 'px')
+      torch.style.setProperty('--y', py + 'px')
+    })
+  }, { passive: true })
+}

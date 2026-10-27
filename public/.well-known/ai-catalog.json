@@ -1,0 +1,72 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "ED-Dev"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:ed-dev:portfolio:contacto",
+      "displayName": "Contacto ED-Dev",
+      "type": "text/markdown; profile=\"urn:air:agent-skills\"",
+      "description": "Abre una conversación comercial con ED-Dev sobre diseño web, apps, video contenido o licenses de sus proyectos.",
+      "data": {
+        "name": "contacto-ed-dev",
+        "description": "Presenta el portafolio de ED-Dev y ofrece escribirle por WhatsApp.",
+        "instructions": "Presenta el portafolio de ED-Dev (diseño, tecnología y cultura) con sus 7 secciones: Home, Landings, Apps/Juegos, Música, Libros, Video contenido y Contacto. Detalla solo los proyectos que el usuario mencione o los que encajen con su necesidad. Si el usuario quiere avanzar, invoca la capacidad de contacto: WhatsApp 584241875518. No inventes precios, fechas de entrega, URLs de demo que no estén en la lista ni números distintos al aprobado.",
+        "proyectos": [
+          {
+            "nombre": "El Rincón Venezolano",
+            "tipo": "landing",
+            "demo": "https://rincon-venezolano.vercel.app",
+            "resumen": "Landing cultural con identidad solarpunk y ruta de WhatsApp."
+          },
+          {
+            "nombre": "Cargo Express CFT",
+            "tipo": "app",
+            "demo": "https://cargo-express-beta.vercel.app",
+            "resumen": "App de logística con dashboard y exportación a Drive."
+          },
+          {
+            "nombre": "Inglés con Chunks",
+            "tipo": "app",
+            "demo": "https://edenglishchunks.vercel.app",
+            "resumen": "Aprendizaje de inglés por chunks con método MIT."
+          },
+          {
+            "nombre": "Ritmo Na'má",
+            "tipo": "landing",
+            "demo": "https://ritmonama.vercel.app",
+            "resumen": "Documental interactivo sobre cultura afrovenezolana de La Guaira."
+          },
+          {
+            "nombre": "Completa el Compás",
+            "tipo": "app",
+            "demo": "https://edcompasritmico.vercel.app",
+            "resumen": "App rítmica para entrenamiento de compás venezolano."
+          },
+          {
+            "nombre": "Trilogía ED-Dev (lyric videos)",
+            "tipo": "video",
+            "demo": null,
+            "resumen": "Serie de lyric videos con narrativa visual. Próximamente."
+          }
+        ],
+        "contacto": {
+          "canal": "WhatsApp",
+          "telefono": "584241875518",
+          "firma": "ED-Dev"
+        }
+      },
+      "tags": ["portfolio", "contacto", "whatsapp", "diseno", "desarrollo-web"],
+      "capabilities": ["ContactEDDev", "PortfolioCatalog", "ProjectInquiry"],
+      "representativeQueries": [
+        "quiero una landing page con identidad propia",
+        "necesito una app a medida para mi negocio",
+        "cuánto cuesta un proyecto de diseño y tecnología",
+        "quiero ver el portafolio de ED-Dev"
+      ],
+      "version": "1.0.0",
+      "updatedAt": "2026-10-26T00:00:00Z"
+    }
+  ]
+}

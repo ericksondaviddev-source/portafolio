@@ -1,0 +1,21 @@
+# Portafolio ED-Dev
+
+> Diseño, tecnología y cultura con recorrido de 7 salas. Un recorrido que va de la caverna (donde se construyen las cosas) al jardín (donde descansan) y sale a la luz para hablar. Firma ED-Dev.
+
+## Contacto
+
+WhatsApp: 584241875518. Escríbeme y te respondo.
+
+## Secciones
+
+- [Home](index.html): portada y proyectos destacados.
+- [Landings](index.html#sala-landings): El Rincón Venezolano, Ritmo Na'má.
+- [Apps / Juegos](index.html#sala-apps): Cargo Express CFT, Inglés con Chunks, Completa el Compás.
+- [Música](index.html#sala-musica): en construcción.
+- [Libros](index.html#sala-libros): en construcción.
+- [Video contenido](index.html#sala-video): Trilogía ED-Dev, lyric videos.
+- [Contacto](index.html#sala-contacto): WhatsApp, propuesta copiada, firma ED-Dev.
+
+## Sobre ED-Dev
+
+Proyectos propios de diseño y tecnología: landing pages con identidad, apps que resuelven un problema real y video con narrativa visual. Todo termina en WhatsApp.
