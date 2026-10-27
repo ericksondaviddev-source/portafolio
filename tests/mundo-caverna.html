@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<title>Banco de pruebas — Mundo Caverna</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;font-family:system-ui;color:#e6f4ea}
+  canvas{display:block;width:100vw;height:100vh}
+  #panel{position:fixed;top:12px;left:12px;z-index:10;background:rgba(0,0,0,.65);padding:10px 14px;border-radius:10px;font-size:12px;line-height:1.7}
+  button{margin-right:6px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="panel">
+  <button id="toggle">Cueva / Jardín</button>
+  <button id="pause">Pausar / Reanudar</button>
+  <button id="resize">Redimensionar</button>
+  <div id="out"></div>
+</div>
+<script type="module">
+import { MundoCaverna } from '../src/mundo-caverna.js';
+const canvas = document.getElementById('c');
+const mundo = new MundoCaverna(canvas, { mode: 'cueva' });
+window.__mundo = mundo;
+const out = document.getElementById('out');
+
+function report() {
+  out.innerHTML = [
+    `DPR real: ${window.devicePixelRatio} | usado: ${mundo.dpr}`,
+    `canvas: ${canvas.width}x${canvas.height} (css ${mundo.width}x${mundo.height})`,
+    `partículas: ${mundo.stars.length} estrellas, ${mundo.glyphs.length} glifos, ${mundo.pollen.length} polen`,
+    `bucle activo: ${mundo.running ? 'sí' : 'no'}`
+  ].join('<br>');
+}
+report();
+
+document.getElementById('toggle').onclick = () => {
+  mundo.setMode(mundo.mode === 'cueva' ? 'jardin' : 'cueva');
+  report();
+};
+document.getElementById('pause').onclick = () => {
+  mundo.running ? mundo.stop() : mundo.start();
+  report();
+};
+document.getElementById('resize').onclick = () => {
+  canvas.style.width = (60 + Math.round(Math.random() * 40)) + 'vw';
+  mundo.resize();
+  report();
+};
+
+// Medición de fps
+let frames = 0, last = performance.now(), fps = 0;
+function tick(now) {
+  frames++;
+  if (now - last >= 1000) {
+    fps = frames;
+    frames = 0; last = now;
+    out.innerHTML = out.innerHTML.replace(/fps: [^<]*/, 'fps: ' + fps);
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+setInterval(report, 1000);
+</script>
+</body>
+</html>
