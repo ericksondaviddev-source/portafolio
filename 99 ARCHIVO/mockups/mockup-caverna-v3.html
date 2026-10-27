@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup — Caverna V3 Materia • ED-Dev</title>
+<style>
+:root{--top:64px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif;overflow-x:hidden}
+body{background:#000;color:#e6f4ea}
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--top);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(0,0,0,.45);backdrop-filter:blur(8px)}
+.topbar button{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:transparent;color:inherit;cursor:pointer}
+.map{display:flex;gap:8px;flex-wrap:wrap}
+.map span{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08)}
+canvas#bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0}
+section{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding-top:var(--top);scroll-snap-align:start}
+.panel{background:rgba(255,255,255,.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:40px;max-width:900px;text-align:center}
+html{scroll-snap-type:y mandatory}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><strong>ED-Dev</strong> Caverna V3</div>
+  <div class="map">
+    <span>Home</span><span>Webs</span><span>Apps</span><span>Videos</span><span>Música</span><span>Libros</span><span>Juegos</span>
+    <button id="toggle">Cueva / Jardín</button>
+  </div>
+</div>
+<canvas id="bg"></canvas>
+<section><div class="panel"><h1>Home — Cúpula estrellada</h1><p>Entra a la caverna. Estrellas, código y polvo revelados por la antorcha.</p></div></section>
+<section><div class="panel"><h1>Apps — Sala de herramientas</h1><p>Paleta azul cielo, ondas de sonido como jeroglíficos.</p></div></section>
+<section><div class="panel"><h1>Webs</h1><p>Esbozo</p></div></section>
+<section><div class="panel"><h1>Videos</h1><p>Esbozo</p></div></section>
+<section><div class="panel"><h1>Música</h1><p>Esbozo</p></div></section>
+<section><div class="panel"><h1>Libros</h1><p>Esbozo</p></div></section>
+<section><div class="panel"><h1>Juegos</h1><p>Sala final</p></div></section>
+<script>
+const canvas=document.getElementById('bg'), ctx=canvas.getContext('2d');
+let w,h,stars=[],dust=[],glyphs=[],mode='cueva',mx=0,my=0;
+function resize(){w=canvas.width=innerWidth;h=canvas.height=innerHeight}
+addEventListener('resize',resize);resize();
+function init(){
+  stars=Array.from({length:200},()=>({x:Math.random()*w,y:Math.random()*h*0.6,r:Math.random()*1.5+0.3,a:Math.random()}));
+  dust=Array.from({length:120},()=>({x:Math.random()*w,y:Math.random()*h,v:Math.random()*0.3+0.1}));
+  glyphs=Array.from({length:60},()=>({x:Math.random()*w,y:Math.random()*h*0.8+ h*0.2,s:Math.random()*12+8}));
+}
+init();
+addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY});
+document.getElementById('toggle').onclick=()=>{
+  mode=mode==='cueva'?'jardin':'cueva';
+  document.body.style.background=mode==='cueva'?'#000':'#fefcf7';
+  document.body.style.color=mode==='cueva'?'#e6f4ea':'#1a1a1a';
+};
+function draw(){
+  ctx.clearRect(0,0,w,h);
+  if(mode==='cueva'){
+    // cúpula
+    const grd=ctx.createRadialGradient(w*0.5,h*0.2,50,w*0.5,h*0.2,h);
+    grd.addColorStop(0,'#0b2e2a');grd.addColorStop(0.4,'#0a1f18');grd.addColorStop(1,'#040a08');
+    ctx.fillStyle=grd;ctx.fillRect(0,0,w,h);
+    // estrellas titilando
+    stars.forEach(s=>{s.a+=0.02; const a=0.5+Math.sin(s.a)*0.5; ctx.globalAlpha=a*0.8; ctx.fillStyle='#c9a45a'; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill()});
+    ctx.globalAlpha=1;
+    // polvo
+    dust.forEach(d=>{d.y+=d.v; if(d.y>h) d.y=0; ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.fillRect(d.x,d.y,2,2)});
+    // jeroglíficos revelados por antorcha
+    glyphs.forEach(g=>{const dx=g.x-mx,dy=g.y-my,dist=Math.hypot(dx,dy); const reveal=Math.max(0,1-dist/300); ctx.globalAlpha=reveal*0.6; ctx.fillStyle='#7a8a4a'; ctx.font=`${g.s}px monospace`; ctx.fillText('⌖',g.x,g.y);});
+    ctx.globalAlpha=1;
+  }else{
+    const grd=ctx.createLinearGradient(0,0,0,h);
+    grd.addColorStop(0,'#e8f6f3');grd.addColorStop(1,'#fefcf7');
+    ctx.fillStyle=grd;ctx.fillRect(0,0,w,h);
+    // sol
+    ctx.fillStyle='rgba(255,220,160,0.2)';ctx.beginPath();ctx.arc(w*0.8,h*0.2,120,0,Math.PI*2);ctx.fill();
+    // polen/luciérnagas
+    stars.forEach(s=>{ctx.globalAlpha=0.6;ctx.fillStyle='#b08a3a';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill()});
+    ctx.globalAlpha=1;
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup — Caverna Navegable v4 • ED-Dev</title>
+<style>
+:root{
+  --bg-cueva:#040a08; --txt-cueva:#e6f4ea; --gold:#c9a45a;
+  --bg-jardin:#fefcf7; --txt-jardin:#1a1a1a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif}
+body.cueva{background:#040a08;color:var(--txt-cueva)}
+body.jardin{background:#fefcf7;color:var(--txt-jardin)}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(0,0,0,.35);backdrop-filter:blur(8px)}
+.topbar button{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:transparent;color:inherit;cursor:pointer}
+.map{display:flex;gap:8px;flex-wrap:wrap}
+.map span{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);font-size:12px}
+.viewport{position:absolute;inset:60px 0 0 0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;display:flex}
+.room{scroll-snap-align:start;min-width:100vw;height:100%;position:relative;display:flex;align-items:center;justify-content:center}
+.room::before{content:'';position:absolute;inset:0;opacity:.35;filter:blur(40px)}
+.room.home::before{background:radial-gradient(1200px 600px at 20% 50%,#0b2e2a 0%,transparent 60%),radial-gradient(800px 400px at 80% 30%,#1a3a2a 0%,transparent 60%)}
+.room.apps::before{background:radial-gradient(1200px 600px at 70% 50%,#2a4e6b 0%,transparent 60%),radial-gradient(800px 400px at 30% 70%,#1e3a4b 0%,transparent 60%)}
+/* other rooms placeholder */
+.room .panel{position:relative;z-index:2;background:rgba(255,255,255,.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:32px;max-width:900px;text-align:center}
+.torch{position:fixed;inset:0;pointer-events:none;z-index:40}
+.torch::after{content:'';position:absolute;left:var(--x,50%);top:var(--y,50%);width:600px;height:600px;transform:translate(-50%,-50%);background:radial-gradient(circle at center,rgba(255,220,180,.85) 0%,rgba(255,220,180,.25) 30%,transparent 70%);mix-blend-mode:screen;filter:blur(10px)}
+body.jardin .torch::after{background:radial-gradient(circle at center,rgba(255,255,255,.9) 0%,rgba(255,255,255,.4) 30%,transparent 70%)}
+.cueva-mask{position:fixed;inset:0;pointer-events:none;z-index:30;background:#040a08}
+body.cueva .cueva-mask{background:radial-gradient(circle at var(--x,50%) var(--y,50%),transparent 80px,rgba(4,10,8,.9) 300px)}
+body.jardin .cueva-mask{opacity:0}
+footer{position:fixed;bottom:12px;left:0;right:0;text-align:center;font-size:11px;opacity:.6}
+/* Materias añadidas - sin tocar luz */
+.materia{position:fixed;inset:0;pointer-events:none;z-index:10;overflow:hidden}
+.star{position:absolute;width:2px;height:2px;background:#c9a45a;border-radius:50%;opacity:.6;animation:twinkle 3s infinite}
+.glyph{position:absolute;font-family:monospace;font-size:10px;color:#7a8a4a;opacity:.15}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+</style>
+</head>
+<body class="cueva">
+<div class="topbar">
+  <div><strong>ED-Dev</strong> Caverna</div>
+  <div class="map">
+    <span>Home</span><span>Webs</span><span>Apps</span><span>Videos</span><span>Música</span><span>Libros</span><span>Juegos</span>
+    <button id="toggle">Cueva / Jardín</button>
+  </div>
+</div>
+<div class="viewport" id="vp">
+  <section class="room home"><div class="panel"><h1>Home — Sala de Entrada</h1><p>Sobre mí, oferta y destacados. Paleta inspirada en pintura turquesa.</p></div></section>
+  <section class="room apps"><div class="panel"><h1>Apps — Sala de Herramientas</h1><p>Tarjetas de apps generadas desde datos. Clima azul cielo.</p></div></section>
+  <section class="room"><div class="panel"><h1>Webs</h1><p>Esbozo</p></div></section>
+  <section class="room"><div class="panel"><h1>Videos</h1><p>Esbozo</p></div></section>
+  <section class="room"><div class="panel"><h1>Música</h1><p>Esbozo</p></div></section>
+  <section class="room"><div class="panel"><h1>Libros</h1><p>Esbozo</p></div></section>
+  <section class="room"><div class="panel"><h1>Juegos</h1><p>Nueva sala final</p></div></section>
+</div>
+<div class="materia" id="materia"></div>
+<div class="torch" id="torch"></div>
+<div class="cueva-mask"></div>
+<footer>ED-Dev • Mockup v4 cueva navegable — aprobación visual requerida</footer>
+<script>
+const body=document.body;
+document.getElementById('toggle').onclick=()=>body.classList.toggle('jardin')||body.classList.toggle('cueva');
+const torch=document.getElementById('torch');
+let x=50,y=50;
+const move=(e)=>{x=(e.clientX||e.touches?.[0]?.clientX)||x; y=(e.clientY||e.touches?.[0]?.clientY)||y; update() };
+function update(){torch.style.setProperty('--x',x+'px');torch.style.setProperty('--y',y+'px'); document.documentElement.style.setProperty('--x',x+'px'); document.documentElement.style.setProperty('--y',y+'px');}
+['pointermove','touchmove'].forEach(ev=>document.addEventListener(ev,move));
+update();
+// Materia enriquecida - sin tocar luz
+const materia=document.getElementById('materia');
+for(let i=0;i<300;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*60+'%';s.style.animationDelay=(Math.random()*3)+'s';materia.appendChild(s);}
+const glyphs=['⌖','⌘','⌬','⌷','◆','◈','{ }','/* */','~','≈','♪','♯','★'];
+for(let i=0;i<80;i++){const g=document.createElement('div');g.className='glyph';g.textContent=glyphs[i%glyphs.length];g.style.left=Math.random()*100+'%';g.style.top=(60+Math.random()*40)+'%';materia.appendChild(g);}
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup — Portafolio Multipágina • ED-Dev</title>
+<style>
+:root{
+  --bg:#050a08; --deep:#0a1f18; --turq:#0b2e2a; --gold:#c9a45a; --olive:#7a8a4a; --amber:#ffb84d;
+  --glass:rgba(255,255,255,.08); --txt:#e6f4ea; --muted:#9fb9a8;
+}
+.light{
+  --bg:#fefcf7; --deep:#e6e0cf; --turq:#e8f6f3; --gold:#b08a3a; --olive:#6b7a3a; --amber:#e8c07a;
+  --glass:rgba(255,255,255,.65); --txt:#1a1a1a; --muted:#5a5a5a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;color:var(--txt);background:var(--bg)}
+body{transition:background 1s}
+.container{max-width:1100px;margin:0 auto;padding:24px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+nav button{margin:2px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:transparent;color:var(--txt);cursor:pointer}
+nav button.active{background:var(--gold);color:#000;border-color:transparent}
+.hero{position:relative;min-height:320px;border-radius:20px;overflow:hidden;display:flex;align-items:flex-end;padding:24px;background-size:cover;background-position:center}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65),rgba(0,0,0,.15))}
+.hero h1,.hero p{position:relative;z-index:2;margin:0}
+.grid{display:grid;gap:16px;margin-top:24px}
+@media(min-width:900px){.grid{grid-template-columns:repeat(3,1fr)}}
+.card{background:var(--glass);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
+.card h3{margin:0 0 8px}
+.muted{color:var(--muted);font-size:14px}
+#torch{position:fixed;inset:0;pointer-events:none;z-index:10}
+#torch::before{content:'';position:fixed;left:var(--x,50%);top:var(--y,50%);width:320px;height:320px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,184,77,.18),transparent 60%);filter:blur(20px);pointer-events:none}
+.view{display:none}
+.view.active{display:block}
+footer{margin-top:32px;text-align:center;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div id="torch"></div>
+<div class="container">
+<header>
+  <div><strong>ED-Dev</strong> Portafolio Multipágina — Mockup</div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <nav id="nav"></nav>
+    <button id="theme">Sol/Luna</button>
+  </div>
+</header>
+
+<div id="views"></div>
+<footer>ED-Dev • Mockup arquitectura — aprobación visual requerida</footer>
+</div>
+<script>
+const proyectos=[
+  {id:"rincon",type:"landing",destacado:true,title:{es:"El Rincón Venezolano",en:"El Rincón Venezolano"},description:{es:"Landing cultural.",en:"Cultural landing."}},
+  {id:"cargo-express",type:"app",destacado:false,title:{es:"Cargo Express CFT",en:"Cargo Express CFT"},description:{es:"App logística.",en:"Logistics app."}},
+  {id:"edenglishchunks",type:"app",destacado:false,title:{es:"Inglés con Chunks",en:"English with Chunks"},description:{es:"Aprendizaje por chunks.",en:"Chunk learning."}},
+  {id:"ritmonama",type:"landing",destacado:false,title:{es:"Ritmo Na'má",en:"Ritmo Na'má"},description:{es:"Documental interactivo.",en:"Interactive doc."}},
+  {id:"compas",type:"app",destacado:false,title:{es:"Completa el Compás",en:"Complete the Compass"},description:{es:"App rítmica.",en:"Rhythmic app."}},
+  {id:"trilogia",type:"video",destacado:false,title:{es:"Trilogía ED-Dev",en:"ED-Dev Trilogy"},description:{es:"Lyric videos.",en:"Lyric videos."}}
+];
+const categorias=[
+  {key:'home',label:{es:'Home',en:'Home'}},
+  {key:'app',label:{es:'Apps',en:'Apps'}},
+  {key:'landing',label:{es:'Webs',en:'Webs'}},
+  {key:'video',label:{es:'Videocontenido',en:'Videos'}},
+  {key:'musica',label:{es:'Música',en:'Music'}},
+  {key:'libro',label:{es:'Libros',en:'Books'}}
+];
+let lang='es', view='home';
+const nav=document.getElementById('nav');
+categorias.forEach(c=>{
+  const b=document.createElement('button');
+  b.textContent=c.label[lang];
+  b.dataset.key=c.key;
+  b.onclick=()=>{view=c.key;render()};nav.appendChild(b);
+});
+const views=document.getElementById('views');
+function t(o){return o[lang]||''}
+function card(p){
+  const d=document.createElement('div');d.className='card';
+  const h=document.createElement('h3');h.textContent=t(p.title);d.appendChild(h);
+  const desc=document.createElement('div');desc.className='muted';desc.textContent=t(p.description);d.appendChild(desc);
+  const tipo=document.createElement('div');tipo.className='muted';tipo.textContent='Tipo: '+p.type;d.appendChild(tipo);
+  return d;
+}
+function render(){
+  views.innerHTML='';
+  // update nav active
+  [...nav.children].forEach(b=>b.classList.toggle('active',b.dataset.key===view));
+  if(view==='home'){
+    const hero=document.createElement('div');
+    hero.className='hero';
+    hero.style.backgroundImage="url('referencias-pinturas/IMG_20261023_163403_455.jpg')";
+    hero.innerHTML='<h1>ED-Dev</h1><p>Diseño, tecnología y cultura con método propio.</p>';
+    views.appendChild(hero);
+    const g=document.createElement('div');g.className='grid';
+    const destacados=proyectos.filter(p=>p.destacado).concat(proyectos.filter(p=>!p.destacado).slice(0,4));
+    destacados.forEach(p=>g.appendChild(card(p)));
+    views.appendChild(g);
+  }else{
+    const cat=categorias.find(c=>c.key===view);
+    const head=document.createElement('div');
+    head.style.padding='16px 0';
+    const h2=document.createElement('h2');h2.textContent=t(cat.label);head.appendChild(h2);
+    views.appendChild(head);
+    if(['musica','libro'].includes(view)){
+      const p=document.createElement('div');p.className='card';p.textContent='En construcción con dignidad';
+      views.appendChild(p);
+      return;
+    }
+    const g=document.createElement('div');g.className='grid';
+    const items=proyectos.filter(p=>p.type===view);
+    if(items.length===0){g.innerHTML='<div class="card muted">Sin proyectos en esta categoría</div>'}
+    items.forEach(p=>g.appendChild(card(p)));
+    views.appendChild(g);
+  }
+}
+document.getElementById('theme').onclick=()=>document.body.classList.toggle('light');
+// torch
+const torch=document.getElementById('torch');
+let x=0,y=0;
+document.addEventListener('pointermove',e=>{x=e.clientX;y=e.clientY});
+(function loop(){torch.style.setProperty('--x',x+'px');torch.style.setProperty('--y',y+'px');requestAnimationFrame(loop)})();
+render();
+</script>
+</body>
+</html>

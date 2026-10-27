@@ -1,0 +1,62 @@
+export default {
+  es: {
+    appTitle: 'P0 Portafolio',
+    heroTitle: 'Solarpunk para proyectos que crecen',
+    heroDesc: 'Bento grid, glassmorphism y acentos tricolor. Cada proyecto lista su demo y su ruta de WhatsApp.',
+    heroBtn: 'Ver proyectos',
+    filterTitle: 'Filtrar por tipo',
+    filters: {
+      todo: 'Todo',
+      landing: 'Landing',
+      app: 'App',
+      video: 'Video',
+      musica: 'Música',
+      libro: 'Libro'
+    },
+    styleTitle: 'Estilo de la casa',
+    styleDesc: 'Light/Dark, bento, glass, maximalismo controlado.',
+    whatsappTitle: 'WhatsApp final',
+    whatsappLabel: 'Contactar ahora',
+    archTitle: 'Arquitectura',
+    archDesc: 'Componentes reutilizables, build verificado, firma ED-Dev.',
+    projectsTitle: 'Proyectos destacados',
+    btnDemo: 'Ver demo',
+    btnDemoSoon: 'Pronto',
+    btnCopy: 'Copiar propuesta',
+    btnWhatsApp: 'WhatsApp',
+    footer: 'ED-Dev • Portafolio P0 — diseño primero, código después',
+    toastCopy: 'Propuesta copiada',
+    toastCopyFail: 'No se pudo copiar',
+    langToggle: 'ES / EN'
+  },
+  en: {
+    appTitle: 'P0 Portfolio',
+    heroTitle: 'Solarpunk for growing projects',
+    heroDesc: 'Bento grid, glassmorphism and tricolor accents. Each project lists its demo and WhatsApp route.',
+    heroBtn: 'See projects',
+    filterTitle: 'Filter by type',
+    filters: {
+      todo: 'All',
+      landing: 'Landing',
+      app: 'App',
+      video: 'Video',
+      musica: 'Music',
+      libro: 'Book'
+    },
+    styleTitle: 'House style',
+    styleDesc: 'Light/Dark, bento, glass, controlled maximalism.',
+    whatsappTitle: 'Final WhatsApp',
+    whatsappLabel: 'Contact now',
+    archTitle: 'Architecture',
+    archDesc: 'Reusable components, verified build, ED-Dev signature.',
+    projectsTitle: 'Featured projects',
+    btnDemo: 'View demo',
+    btnDemoSoon: 'Soon',
+    btnCopy: 'Copy proposal',
+    btnWhatsApp: 'WhatsApp',
+    footer: 'ED-Dev • Portfolio P0 — design first, code after',
+    toastCopy: 'Proposal copied',
+    toastCopyFail: 'Copy failed',
+    langToggle: 'ES / EN'
+  }
+}

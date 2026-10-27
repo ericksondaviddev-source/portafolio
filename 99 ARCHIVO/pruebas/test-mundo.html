@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prueba Mundo Caverna</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#000;font-family:system-ui}canvas{display:block;width:100vw;height:100vh}button{position:fixed;top:12px;left:12px;z-index:10}#map{position:fixed;top:12px;right:12px;z-index:10;background:rgba(0,0,0,0.5);color:#fff;padding:6px 10px;border-radius:8px;font-size:12px}#map span{margin:0 6px;opacity:.5}#map span.active{opacity:1;text-decoration:underline}#viewport{position:relative;width:100vw;height:100vh;overflow:hidden}#stage{position:absolute;left:0;top:0;height:100%;display:flex;will-change:transform;transition:none}</style>
+</head>
+<body>
+<div id="map"><span data-i="0">Home</span><span data-i="1">Webs</span><span data-i="2">Apps</span></div>
+<button id="toggle">Cueva / Jardín</button>
+<div id="viewport"><div id="stage"></div></div>
+<script type="module">
+import { MundoCaverna } from './src/mundo-caverna.js';
+const params = new URLSearchParams(location.search);
+const fx = parseFloat(params.get('luz')?.split(',')[0]);
+const fy = parseFloat(params.get('luz')?.split(',')[1]);
+const viajeInit = parseFloat(params.get('viaje') ?? '0');
+const rooms = ['Home','Webs','Apps'];
+const stage = document.getElementById('stage');
+const viewport = document.getElementById('viewport');
+const mapSpans = [...document.querySelectorAll('#map span')];
+let mode = 'cueva';
+function createRoom(i){
+  const wrap = document.createElement('div');
+  wrap.style.width = '100vw'; wrap.style.height = '100vh'; wrap.style.position = 'relative';
+  const canvas = document.createElement('canvas');
+  canvas.width = innerWidth; canvas.height = innerHeight;
+  wrap.appendChild(canvas);
+  stage.appendChild(wrap);
+  const mundo = new MundoCaverna(canvas, {mode});
+  if (!isNaN(fx) && !isNaN(fy)) { mundo.mx = Math.min(1, Math.max(0, fx)); mundo.my = Math.min(1, Math.max(0, fy)); }
+  return {wrap, canvas, mundo};
+}
+const roomsInst = [...Array(3)].map((_,i)=>createRoom(i));
+let scrollX = Math.max(0, Math.min(2, viajeInit))*innerWidth;
+let velocity = 0; let targetX = scrollX; let raf = null;
+function updateTransform(){
+  stage.style.transform = `translateX(${-scrollX}px)`;
+  const idx = Math.round(scrollX / innerWidth);
+  mapSpans.forEach((s,i)=>s.classList.toggle('active', i===idx));
+}
+function animate(){
+  velocity *= 0.92;
+  scrollX += velocity;
+  scrollX = Math.max(0, Math.min(2*innerWidth, scrollX));
+  // snap suave
+  const nearest = Math.round(scrollX / innerWidth) * innerWidth;
+  if (Math.abs(nearest - scrollX) < 1) scrollX = nearest; velocity *= 0.7;
+  updateTransform();
+  raf = requestAnimationFrame(animate);
+}
+animate();
+window.addEventListener('wheel', e=>{ e.preventDefault(); velocity += e.deltaY * 0.3; }, {passive:false});
+let dragStart = null;
+viewport.addEventListener('pointerdown', e=>{ dragStart = e.clientX; velocity = 0; });
+window.addEventListener('pointermove', e=>{ if(dragStart===null) return; const dx = e.clientX - dragStart; velocity = dx * 0.8; dragStart = e.clientX; });
+window.addEventListener('pointerup', ()=>{ dragStart = null; });
+window.addEventListener('keydown', e=>{ if(e.key==='ArrowRight') velocity -= innerWidth*0.3; if(e.key==='ArrowLeft') velocity += innerWidth*0.3; });
+window.addEventListener('resize', ()=>{
+  roomsInst.forEach(r=>{ r.canvas.width = innerWidth; r.canvas.height = innerHeight; r.mundo.resize(); });
+  scrollX = Math.round(scrollX / innerWidth) * innerWidth;
+});
+document.getElementById('toggle').onclick = () => {
+  mode = mode === 'cueva' ? 'jardin' : 'cueva';
+  roomsInst.forEach(r=>r.mundo.setMode(mode));
+};
+</script>
+</body>
+</html>
