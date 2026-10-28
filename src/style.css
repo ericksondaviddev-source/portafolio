@@ -1,4 +1,6 @@
 :root {
+  --font-display: "Space Grotesk Variable", "Inter Variable", system-ui, sans-serif;
+  --font-text: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --bg: #050a08;
   --bg2: #0a1510;
   --glass: rgba(255, 255, 255, .08);
@@ -48,7 +50,7 @@
 html, body {
   margin: 0;
   min-height: 100%;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, sans-serif;
+  font-family: var(--font-text);
   color: var(--text);
   overflow-x: hidden;
 }
@@ -289,8 +291,8 @@ main { display: block }
 
 .projects {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 }
 
 .project {
@@ -314,29 +316,39 @@ main { display: block }
   background: linear-gradient(135deg, rgba(201, 164, 90, .18), rgba(61, 220, 151, .12));
 }
 
-.project-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; height: 100% }
-
-.project-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.project-body { padding: 28px; display: flex; flex-direction: column; gap: 14px; height: 100% }
 
 .project-title { margin: 0; font-size: 18px; line-height: 1.25 }
+
+.project-body h2 {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.4vw, 27px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.015em;
+  margin: -4px 0 2px;
+}
 
 .project-desc {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 16px;
+  line-height: 1.6;
   flex: 1;
 }
+
+.project-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px }
 
 .tag {
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: .06em;
+  letter-spacing: .09em;
   text-transform: uppercase;
-  padding: 4px 9px;
+  padding: 5px 11px;
   border-radius: 999px;
   background: var(--tag-bg);
   color: var(--tag-fg);
+  align-self: flex-start;
 }
 
 .tag.soon { background: var(--tag2-bg); color: var(--tag2-fg) }
@@ -426,3 +438,177 @@ footer {
   .btn { transition: none }
   .skip-link { transition: none }
 }
+
+/* Recorrido horizontal */
+#caverna {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  display: block;
+}
+.stage {
+  position: relative;
+  z-index: 2;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+/* En escritorio el snap lo maneja la inercia de recorrido.js: el snap CSS
+   de Chrome revierte los scrolls programáticos y pelea con el lerp. */
+@media (hover: hover) and (pointer: fine) {
+  .stage { scroll-snap-type: none; }
+}
+.track {
+  display: flex;
+  height: 100%;
+  width: max-content;
+}
+.room {
+  flex: none;
+  width: 100vw;
+  height: 100vh;
+  scroll-snap-align: start;
+  padding: 80px 6vw 60px;
+  box-sizing: border-box;
+  position: relative;
+  overflow-y: auto;
+}
+/* El canvas no cambia con prefers-color-scheme: cueva siempre oscura, jardín siempre claro.
+   Los tokens de texto se fijan por ambiente para garantizar contraste en ambos. */
+.room[data-ambiente="cueva"] {
+  color: var(--text);
+  --text: #e6f4ea;
+  --muted: #daeadd;
+  --glass: rgba(255, 255, 255, .08);
+  --glass-strong: rgba(255, 255, 255, .14);
+  --line: rgba(255, 255, 255, .14);
+  --line-strong: rgba(255, 255, 255, .32);
+  --tag-bg: rgba(247, 201, 72, .22);
+  --tag-fg: #ffe9b0;
+  --tag2-bg: rgba(61, 220, 151, .2);
+  --tag2-fg: #b8f7d6;
+}
+.room[data-ambiente="jardin"] {
+  color: var(--text);
+  --text: #16211b;
+  --muted: #4d5a52;
+  --glass: rgba(255, 255, 255, .72);
+  --glass-strong: rgba(255, 255, 255, .92);
+  --line: rgba(22, 33, 27, .16);
+  --line-strong: rgba(22, 33, 27, .4);
+}
+.room-head {
+  /* Capas de compositor: el parallax anima por GPU, sin repintar cada frame */
+  will-change: transform, opacity;
+}
+.room-head h1 {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 9vw, 128px);
+  font-weight: 760;
+  line-height: .95;
+  letter-spacing: -.03em;
+  margin: 6px 0 16px;
+}
+.room-index {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .4em;
+  text-transform: uppercase;
+  color: var(--accent2);
+}
+.room-sub { color: var(--muted); font-size: clamp(18px, 2vw, 22px); max-width: 58ch; line-height: 1.55 }
+.home-actions { display: flex; gap: 12px; margin-top: 12px }
+.map {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 6px;
+  background: var(--glass-strong);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px;
+  backdrop-filter: blur(12px);
+}
+.map-item {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.map-item.active { color: var(--text); background: var(--glass); }
+.map-index { margin-right: 8px; opacity: .55 }
+.lang-btn {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  z-index: 10;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--glass);
+  color: var(--text);
+  cursor: pointer;
+}
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 20;
+  background: rgba(128, 128, 128, .12);
+  pointer-events: none;
+}
+.progress-bar {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--gold), var(--accent1));
+}
+.contacto-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 10;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--glass-strong);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.contacto-btn.oculto {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+/* Proyectos destacados en Home */
+.home-featured { margin-top: 34px; max-width: 100% }
+.featured-title {
+  font-family: var(--font-display);
+  font-size: clamp(19px, 2.2vw, 24px);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  margin: 0 0 14px;
+  padding-left: 12px;
+  border-left: 3px solid var(--gold);
+}
+.proyectos-casa { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) }
+.proyectos-casa .project-body { padding: 20px 22px; gap: 10px }
+.proyectos-casa .project-body h2 { font-size: 20px }
+

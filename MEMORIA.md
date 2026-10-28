@@ -13,17 +13,36 @@ Portafolio ED-Dev: webapp de una sola página con recorrido horizontal de 7 sala
 - 2026-10-26 — El filtro por tipo se elimina: la navegación por salas ES el filtro.
 - 2026-10-26 — Erickson autoriza modificar `src/mundo-caverna.js` (estaba congelado) para optimización interna: DPR, pausa, debounce, caché de gradientes, densidad adaptativa. Sin cambiar su API ni su aspecto.
 - 2026-10-26 — Nada público sin sí explícito. Este plan no incluye deploy, registro ni APIs de pago.
+- 2026-10-27 — El texto por ambiente se fija en tokens por sala (`.room[data-ambiente]`), no con `prefers-color-scheme`: el canvas no reacciona al esquema del sistema.
 
 ## Lecciones verificadas
-- (pendiente de verificar 2x) La verificación post-build que busca el marcador `ED-Dev` en `dist/assets/*.js` funciona y falla el build cuando la firma falta.
+- 2026-10-27 — Heading order corregido de h3 a h2 en proyectos dentro de salas: Accessibility sube de 96 a 100 en Lighthouse.
+- 2026-10-27 — Scroll del track y ResizeObserver de mundo-caverna deben usar requestAnimationFrame para evitar layout thrashing y mantener 60 fps.
+- 2026-10-27 — La verificación post-build que busca el marcador `ED-Dev` en `dist/assets/*.js` funciona y falla el build cuando la firma falta (verificado 2× hoy mismo).
+- 2026-10-27 — `scrollTo` sobre un elemento sin overflow hace NADA en silencio: el `.track` medía `max-content` y el scroll real vivía en `.stage`. El bug de navegación se destapó mirando las capturas, no con el build en verde.
+- 2026-10-27 — El scroll de Chrome re-encaja los scrolls de programación a la maestra snap más cercana (proximity): pelea con cualquier lerp de rAF en desktop. Pieza: `@media (hover:hover and pointer:fine) { .stage { scroll-snap-type: none } }`.
+- 2026-10-27 — El snap-suave NO se hace en cada evento de rueda: con deltas de 100-160px el destino cae casi siempre en ~25% de la sala actual y la rueda nunca sale del sitio. Se redondea solo al asentarse (cuando la persecución lerp termina).
 
 ## Vara actual (qué subió 1% y cuándo)
 - 2026-10-26 — Línea base: armazón estático con i18n incompleta, fuga de IntersectionObserver, 3 canvas en test-mundo, sin docs/ ni git. Objetivo de esta actualización: recorrido navegable + caverna integrada + 60 fps en gama media + repo limpio con memoria viva.
+- 2026-10-27 — Accessibility 100 Lighthouse, CLS 0, scroll rAF, heading orden correcto. Firma ED-Dev verificada en build.
+- 2026-10-27 — Fase 3 cerrada con evidencia vista: navegación reparada (goTo sobre `.stage`), tokens por ambiente (cueva oscura / jardín claro siempre legibles), sala Contacto real (WhatsApp de `CONFIG` + copiar propuesta con toast), tarjeta "En construcción con dignidad" con texto, mapa con `01 Índice` separado, botón "Entrar al recorrido" en Home y tarjetas de proyecto visibles (`IntersectionObserver` con `unobserve`, sin fuga). 60-61 FPS escritorio/móvil emulado, 0 errores de consola, 14 capturas en `02 LISTOS/Portafolio-v2/evidencia/`, build con firma.
+- 2026-10-27 — P5.1+P5.2: rueda vertical/lateral con inercia lerp (persecución y freno, factor .16), snap-suave solo al asentarse (≤25% de la sala), snap CSS desactivado en escritorio (peleaba con el lerp; queda proximity solo para táctil). Evidencia: `scripts/prueba-inercia.mjs` con muestreo 814→899→930→945→952→956→957 + captura `inercia-final.png` + FPS intactos 60-61 y 0 errores.
+- 2026-10-27 — P5.3 amanecer: `mundo-caverna.js` repara el salto cueva→jardín con `blend` continuo (lerp, ~1 s): la cueva pesa `(1-b)` y el jardín `b` en cada capa (fondo, estrellas, polvo, rocas, glifos, antorcha, sol, polen, colinas). API intacta (`setMode` ahora fija `blendTarget`); reducido-motion salta al estado final. Evidencia: `scripts/captura-amanecer.mjs` con 5 capturas (0/250/500/900/1600 ms) + 60 FPS durante transición + build con firma. Se ve la luz naciendo sobre el cielo nocturno y las colinas subiendo.
+- 2026-10-27 — P5.4+P5.5: parallax sutil de títulos (translateX ±6% max con piso de opacidad 0.25, se apaga con movimiento reducido) + barra de progreso fija arriba (línea gold→accent1) y botón Contacto siempre visible abajo-derecha que se oculta solo al llegar a la sala de contacto. Evidencia: `scripts/prueba-hud.mjs` (progreso ~50% en mitad, ≥99.9% al final, botón oculto en Contacto, transform mid-vuelo) + capturas `hud-mid-vuelo.png` y `hud-final.png` + FPS 60-61 y 0 errores + build con firma.
+- 2026-10-27 — P6.1 tipografía y tarjetas: fuentes variables locales Space Grotesk (display) + Inter (texto) vía `@fontsource-variable`, empaquetadas woff2 en el build (costo cero, sin CDN); `h1` de sala clamp(56px,9vw,128px) peso 760 line-height .95, kicker de sala y sub 18-22px; tarjetas de proyecto más grandes (340px+, padding 28px, h2 display 22-27px, desc 16px, tag por tipo) y con acciones reales: "Ver demo" (urlDemo, o 'Pronto' si no hay) y "WhatsApp" con la propuesta del proyecto vía `CONFIG` (el número vive solo ahí). Tags y muted reforzados por ambiente cueva. Evidencia: capturas 7 salas + check-ui verde + FPS 60 + build con firma y woff2 en bundle.
+- 2026-10-27 — Proyectos destacados en Home: bloque bajo el hero con título i18n (`featuredTitle`) y las 3 tarjetas `destacado` de los datos (Rincón Venezolano, Completa el Compás, Trilogía). El constructor de tarjeta se extrajo a `crearCard` (una sola definición, la usan las salas y Home). Se reutilizó el estilo aprobado de P6.1 con variantes compactas (`.proyectos-casa`: 300px+, padding 20px, h2 20px) y título con filete gold. Evidencia: captura `desk-01-home.png` + check-ui verde + FPS 59-61 + build con firma.
+- 2026-10-27 — P6.2 fondo vivo: 
+parallax multi-capa ligado al scroll vía `mundo.setScene({scroll,seed})` (canal nuevo, API pública intacta): estrellas casi fijas (0.015), rocas lejanas 0.03, polvo 0.05, polen 0.06, rocas cercanas 0.08, glifos corren 0.14, colinas "caminan" con su fase; y variantes por sala por semilla determinista (`prand`): centro de cúpula del túnel y posición del sol cambian por sala, antorcha con sesgo propio, gradientes recacheados solo al cruzar sala.
+Lección del propio día: el parallax con 7 lecturas de `getBoundingClientRect` por frame tiró la transición a 38 FPS; reparado con cálculo matemático de centros de sala (cero lecturas de layout) + `will-change: transform, opacity` en `.room-head` (capas de compositor) → 58 en vuelo, 60-61 estable.
+Evidencia: capturas de pleno vuelo (0/250 ms con los títulos cruzando y el sol en posición nueva) + `medir-recorrido` 60/60/61 + banco amanecer 58 FPS + build con firma.
 
 ## Pendientes
-- Fase 3: REA + mockup de las 7 salas + aprobación visual de Erickson antes de codear la app.
-- Fase 4: tests de UI, Lighthouse, traza de performance, evidencia en `02 LISTOS/`, reporte final.
+- FPS en teléfono gama media FÍSICO (la medición actual es móvil emulado a 3× DPR en Chromium de escritorio).
+- Captura/grabación del recorrido con Erickson mirando, para su sí de aprobación antes de congelar.
 - Rellenar Música y Libros cuando Erickson tenga material real.
+- Ficha de cada proyecto con imagen cuando Erickson entregue las capturas.
+- Sí de Erickson sobre la sección "Proyectos destacados" en Home (implementada con captura lista).
 
 ## Archivo (lo viejo, sin borrar)
 - `99 ARCHIVO/mockups/` — mockup-boveda, mockup-multipagina, mockup-caverna-v2/v3/v4/v5.

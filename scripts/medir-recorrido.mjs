@@ -35,8 +35,8 @@ async function medir(nombre, viewport, reducedMotion = 'no-preference') {
   }));
 
   const info = await page.evaluate(() => ({
-    salas: document.querySelectorAll('.sala').length,
-    nav: document.querySelectorAll('.nav-btn').length,
+    salas: document.querySelectorAll('.room').length,
+    nav: document.querySelectorAll('.map-item').length,
     h1: document.querySelector('h1')?.textContent || null,
     canvas: document.querySelectorAll('canvas').length,
     lang: document.documentElement.lang

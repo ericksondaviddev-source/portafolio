@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<title>Mockup — Recorrido de 7 salas • ED-Dev</title>
+<style>
+:root{
+  --bg:#050a08; --bg2:#0a1510; --glass:rgba(255,255,255,.08); --glass-strong:rgba(255,255,255,.14);
+  --text:#e6f4ea; --muted:#9fb9a8; --line:rgba(255,255,255,.14); --line-strong:rgba(255,255,255,.32);
+  --accent1:#3ddc97; --accent2:#f7c948; --gold:#c9a45a; --tag-bg:rgba(247,201,72,.16); --tag-fg:#ffe5a3;
+  --btn-fg:#05210f; --radius:20px; --shadow:0 18px 50px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif}
+#caverna{position:fixed;inset:0;width:100%;height:100%;z-index:0;transition:opacity .5s ease}
+body.jardin{--glass:rgba(255,255,255,.72);--glass-strong:rgba(255,255,255,.9);--text:#16211b;--muted:#4d5a52;
+  --line:rgba(22,33,27,.16);--line-strong:rgba(22,33,27,.4);--tag-bg:rgba(150,110,8,.14);--tag-fg:#4d3806}
+.velo{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(5,10,8,.72) 0%,rgba(5,10,8,.25) 32%,rgba(5,10,8,.35) 70%,rgba(5,10,8,.85) 100%)}
+body.jardin .velo{background:linear-gradient(180deg,rgba(254,252,247,.72) 0%,rgba(254,252,247,.18) 32%,rgba(254,252,247,.3) 70%,rgba(254,252,247,.88) 100%)}
+
+.topbar{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:14px;
+  padding:16px 24px;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:.3px}
+.brand span{color:var(--accent1)}
+.map{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.map button{font:inherit;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid transparent;
+  background:transparent;color:var(--muted);cursor:pointer}
+.map button:hover{color:var(--text);border-color:var(--line)}
+.map button.active{color:var(--text);background:var(--glass-strong);border-color:var(--line-strong);font-weight:700}
+.lang{font:inherit;font-size:12px;padding:6px 12px;border-radius:10px;border:1px solid var(--line);
+  background:transparent;color:var(--text);cursor:pointer}
+
+#rieles{position:relative;z-index:2;height:100%;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
+  overscroll-behavior-x:contain;scrollbar-width:none}
+#rieles::-webkit-scrollbar{display:none}
+.sala{flex:0 0 100vw;height:100%;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;
+  padding:92px 24px 92px}
+.inner{width:min(1080px,100%)}
+.numero{font-size:12px;font-weight:700;letter-spacing:.2em;color:var(--gold);margin-bottom:14px}
+.sala h1{margin:0 0 10px;font-size:clamp(32px,6vw,60px);line-height:1.03;letter-spacing:-.02em;max-width:20ch}
+.sala h2{margin:0 0 10px;font-size:clamp(26px,4.6vw,46px);line-height:1.05;letter-spacing:-.02em}
+.sala .resumen{margin:0 0 28px;color:var(--muted);font-size:16px;line-height:1.5;max-width:56ch}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:10px}
+.card .meta{display:flex;gap:8px;align-items:center}
+.tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;
+  border-radius:999px;background:var(--tag-bg);color:var(--tag-fg)}
+.card h3{margin:0;font-size:18px;line-height:1.25}
+.card p{margin:0;color:var(--muted);font-size:14px;line-height:1.5;flex:1}
+.acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:12px;
+  background:linear-gradient(135deg,var(--accent1),#2bbf7f);color:var(--btn-fg);font:inherit;font-weight:700;
+  font-size:14px;border:1px solid transparent;cursor:pointer;text-decoration:none}
+.btn.sec{background:transparent;border-color:var(--line-strong);color:var(--text);font-weight:600}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--text);font-weight:600;padding:8px 12px;border-radius:10px}
+.vacio{border-style:dashed;border-color:var(--line-strong);max-width:640px}
+.vacio strong{display:block;font-size:18px;margin-bottom:8px}
+.vacio p{margin:0;color:var(--muted);line-height:1.5}
+.contacto{max-width:640px;display:flex;flex-direction:column;gap:16px}
+.contacto p{margin:0;color:var(--muted);line-height:1.55}
+.peque{color:var(--muted);font-size:12px}
+
+.pie{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:center;gap:16px;padding:14px 24px}
+.barra{flex:1;height:3px;border-radius:999px;background:var(--line);overflow:hidden}
+.barra i{display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:left;
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:transform .15s linear}
+.contador{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--muted);white-space:nowrap}
+.flechas{display:flex;gap:6px}
+.flechas button{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--glass);
+  color:var(--text);cursor:pointer;font-size:16px;line-height:1}
+.flechas button:hover{border-color:var(--line-strong)}
+.aviso{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);z-index:6;font-size:12px;color:var(--muted);
+  background:var(--glass);border:1px solid var(--line);padding:8px 14px;border-radius:999px;backdrop-filter:blur(8px);
+  pointer-events:none;transition:opacity .6s ease}
+.aviso.oculto{opacity:0}
+@media(max-width:760px){
+  .sala{padding:120px 18px 110px}
+  .topbar{padding:12px 14px}
+  .map{order:3;width:100%;margin-left:0;justify-content:flex-start;overflow-x:auto}
+  .pie{padding:12px 14px}
+  .aviso{bottom:92px}
+}
+</style>
+</head>
+<body>
+<canvas id="caverna"></canvas>
+<div class="velo"></div>
+
+<div class="topbar">
+  <div class="brand"><span>ED-Dev</span></div>
+  <div class="map" id="map" role="navigation" aria-label="Salas"></div>
+  <button class="lang" id="langBtn">ES / EN</button>
+</div>
+
+<div id="rieles"></div>
+
+<div class="aviso">Arrastra, usa la rueda o las flechas ← → para recorrer las salas</div>
+
+<div class="pie">
+  <div class="flechas">
+    <button id="prev" aria-label="Sala anterior">←</button>
+    <button id="next" aria-label="Sala siguiente">→</button>
+  </div>
+  <div class="barra" role="progressbar" aria-label="Progreso del recorrido" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="barraFill"></i></div>
+  <div class="contador" id="contador">SALA 1 / 7</div>
+</div>
+
+<script type="module">
+import { MundoCaverna } from '../src/mundo-caverna.js';
+import salas from '../src/salas.js';
+import proyectos from '../src/proyectos.js';
+
+const canvas = document.getElementById('caverna');
+const mundo = new MundoCaverna(canvas, { mode: 'cueva' });
+const rieles = document.getElementById('rieles');
+const map = document.getElementById('map');
+const contador = document.getElementById('contador');
+const barraFill = document.getElementById('barraFill');
+
+let lang = 'es';
+const t = (o) => (o && (o[lang] ?? o.es)) || '';
+const textos = {
+  es: { wa:'WhatsApp', demo:'Ver demo', pronto:'Pronto', copy:'Copiar propuesta', cta:'Escríbeme por WhatsApp',
+        copyGral:'Copiar propuesta general', aviso:'Arrastra, usa la rueda o las flechas ← → para recorrer las salas',
+        vacioT:'En construcción con dignidad', vacioD:'Esta sala se está trabajando. Vuelve pronto o escríbeme y te cuento.',
+        hero:'Solarpunk para proyectos que crecen',
+        heroD:'Siete salas para recorrer: la caverna donde se construyen las cosas, el jardín donde descansan, y la salida a la luz para hablar.',
+        destacados:'Proyectos destacados', sala:'SALA', de:'DE', entrada:'Entrar al recorrido' },
+  en: { wa:'WhatsApp', demo:'View demo', pronto:'Soon', copy:'Copy proposal', cta:'Write me on WhatsApp',
+        copyGral:'Copy general proposal', aviso:'Drag, use the wheel or the ← → arrows to walk the rooms',
+        vacioT:'Under construction, with dignity', vacioD:'This room is being worked on. Come back soon or write me and I will tell you about it.',
+        hero:'Solarpunk for projects that grow',
+        heroD:'Seven rooms to walk through: the cave where things get built, the garden where they rest, and the way out into the light to talk.',
+        destacados:'Featured projects', sala:'ROOM', de:'OF', entrada:'Enter the journey' }
+};
+const T = () => textos[lang];
+
+const WA = '584241875518';
+
+// ── Contenido ──
+function tarjeta(p) {
+  const d = document.createElement('article');
+  d.className = 'card';
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  const tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.textContent = p.type;
+  meta.appendChild(tag);
+  const h = document.createElement('h3');
+  h.textContent = t(p.title);
+  const desc = document.createElement('p');
+  desc.textContent = t(p.description);
+  const acc = document.createElement('div');
+  acc.className = 'acciones';
+  if (p.urlDemo) {
+    const a = document.createElement('a');
+    a.className = 'btn sec'; a.href = p.urlDemo; a.target = '_blank'; a.rel='noopener';
+    a.textContent = T().demo; acc.appendChild(a);
+  } else {
+    const s = document.createElement('span');
+    s.className = 'btn sec'; s.textContent = T().pronto; s.style.opacity = '.6';
+    acc.appendChild(s);
+  }
+  const c = document.createElement('button');
+  c.className = 'btn sec'; c.textContent = T().copy;
+  c.onclick = () => navigator.clipboard?.writeText(t(p.propuesta));
+  const w = document.createElement('a');
+  w.className = 'btn'; w.target = '_blank'; w.rel='noopener';
+  w.href = `https://wa.me/${WA}?text=${encodeURIComponent(t(p.propuesta))}`;
+  w.textContent = T().wa;
+  acc.append(c, w);
+  d.append(meta, h, desc, acc);
+  return d;
+}
+
+function sala(sala, i) {
+  const sec = document.createElement('section');
+  sec.className = 'sala';
+  sec.dataset.sala = sala.id;
+  sec.dataset.ambiente = sala.ambiente;
+  const inner = document.createElement('div');
+  inner.className = 'inner';
+  const num = document.createElement('div');
+  num.className = 'numero';
+  num.textContent = `${String(i + 1).padStart(2,'0')} — ${t(sala.titulo).toUpperCase()}`;
+  inner.appendChild(num);
+
+  if (sala.id === 'home') {
+    const h = document.createElement('h1');
+    h.textContent = T().hero;
+    const p = document.createElement('p');
+    p.className = 'resumen'; p.textContent = T().heroD;
+    const b = document.createElement('button');
+    b.className = 'btn'; b.textContent = T().entrada;
+    b.onclick = () => irA(1);
+    inner.append(h, p, b);
+    const sub = document.createElement('h2');
+    sub.style.marginTop = '40px'; sub.style.fontSize = '20px'; sub.textContent = T().destacados;
+    inner.appendChild(sub);
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    proyectos.filter(p=>p.destacado).forEach(p=>grid.appendChild(tarjeta(p)));
+    inner.appendChild(grid);
+  } else {
+    const h = document.createElement('h2');
+    h.textContent = t(sala.titulo);
+    const p = document.createElement('p');
+    p.className = 'resumen'; p.textContent = t(sala.resumen);
+    inner.append(h, p);
+    const items = proyectos.filter(p=>p.sala===sala.id);
+    if (items.length) {
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+      items.forEach(p=>grid.appendChild(tarjeta(p)));
+      inner.appendChild(grid);
+    } else if (sala.id === 'contacto') {
+      const card = document.createElement('div');
+      card.className = 'card contacto';
+      const p2 = document.createElement('p');
+      p2.textContent = lang==='es'
+        ? 'Dime qué necesitas y te respondo por WhatsApp. También puedes llevarte el texto de la propuesta y enviarlo donde quieras.'
+        : 'Tell me what you need and I answer on WhatsApp. You can also take the proposal text with you and send it anywhere.';
+      const acc = document.createElement('div');
+      acc.className = 'acciones';
+      const w = document.createElement('a');
+      w.className = 'btn'; w.target='_blank'; w.rel='noopener';
+      w.href = `https://wa.me/${WA}?text=${encodeURIComponent(lang==='es'?'Hola ED-Dev, te escribo desde tu portafolio. Quiero contarte mi proyecto y saber cómo trabajamos.':'Hi ED-Dev, I am writing from your portfolio. I want to tell you about my project and know how we work together.')}`;
+      w.textContent = T().cta;
+      const c = document.createElement('button');
+      c.className='btn sec'; c.textContent=T().copyGral;
+      acc.append(w,c);
+      card.append(p2, acc);
+      inner.appendChild(card);
+    } else {
+      const card = document.createElement('div');
+      card.className = 'card vacio';
+      const st = document.createElement('strong');
+      st.textContent = T().vacioT;
+      const p2 = document.createElement('p');
+      p2.textContent = T().vacioD;
+      card.append(st,p2);
+      inner.appendChild(card);
+    }
+  }
+  sec.appendChild(inner);
+  return sec;
+}
+
+salas.forEach((s,i)=>rieles.appendChild(sala(s,i)));
+
+// ── Mapa de salas ──
+const botones = salas.map((s,i)=>{
+  const b = document.createElement('button');
+  b.textContent = t(s.titulo);
+  b.onclick = () => irA(i);
+  map.appendChild(b);
+  return b;
+});
+
+// ── Navegación ──
+let actual = 0;
+function irA(i) {
+  i = Math.max(0, Math.min(salas.length-1, i));
+  rieles.scrollTo({ left: i * window.innerWidth, behavior: 'smooth' });
+}
+function ambientar(sala) {
+  const jardin = sala.ambiente === 'jardin';
+  if (document.body.classList.contains('jardin') === jardin) return;
+  canvas.style.opacity = '0';
+  setTimeout(()=>{ mundo.setMode(jardin?'jardin':'cueva'); document.body.classList.toggle('jardin', jardin); canvas.style.opacity='1'; }, 260);
+}
+
+rieles.addEventListener('scroll', ()=>{
+  const max = rieles.scrollWidth - rieles.clientWidth;
+  const pct = max>0 ? rieles.scrollLeft/max : 0;
+  barraFill.style.transform = `scaleX(${pct})`;
+  const i = Math.round(rieles.scrollLeft / window.innerWidth);
+  if (i !== actual) {
+    actual = i;
+    botones.forEach((b,k)=>b.classList.toggle('active', k===i));
+    ambientar(salas[i]);
+    contador.textContent = `${T().sala} ${i+1} / ${salas.length}`;
+  }
+}, { passive:true });
+
+// rueda vertical -> recorrido horizontal
+rieles.addEventListener('wheel', (e)=>{
+  if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+  e.preventDefault();
+  rieles.scrollLeft += e.deltaY;
+}, { passive:false });
+
+document.getElementById('prev').onclick = ()=>irA(actual-1);
+document.getElementById('next').onclick = ()=>irA(actual+1);
+document.addEventListener('keydown', (e)=>{
+  if (e.key==='ArrowRight') { e.preventDefault(); irA(actual+1); }
+  if (e.key==='ArrowLeft')  { e.preventDefault(); irA(actual-1); }
+});
+document.getElementById('langBtn').onclick = ()=>{
+  lang = lang==='es'?'en':'es';
+  document.documentElement.lang = lang;
+  rieles.innerHTML = '';
+  salas.forEach((s,i)=>rieles.appendChild(sala(s,i)));
+  map.innerHTML = '';
+  botones.length = 0;
+  salas.forEach((s,i)=>{ const b=document.createElement('button'); b.textContent=t(s.titulo); b.onclick=()=>irA(i); map.appendChild(b); botones.push(b); });
+  document.querySelector('.aviso').textContent = T().aviso;
+  actual = -1;
+  irA(0);
+};
+
+// inicio
+botones[0].classList.add('active');
+contador.textContent = `${T().sala} 1 / ${salas.length}`;
+
+const aviso = document.querySelector('.aviso');
+setTimeout(()=>aviso.classList.add('oculto'), 5000);
+rieles.addEventListener('scroll', ()=>aviso.classList.add('oculto'), { once:true });
+</script>
+</body>
+</html>

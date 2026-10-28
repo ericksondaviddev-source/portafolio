@@ -16,6 +16,10 @@ export class MundoCaverna {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.mode = mode;
+    this.blend = mode === 'jardin' ? 1 : 0;
+    this.blendTarget = this.blend;
+    this.sceneSeed = 0;   // variante de escena (sala actual)
+    this.scrollOffset = 0; // parallax: desplazamiento del recorrido (px)
     this.stars = [];
     this.dust = [];
     this.glyphs = [];
@@ -88,7 +92,27 @@ export class MundoCaverna {
 
   setMode(m) {
     this.mode = m;
+    this.blendTarget = m === 'jardin' ? 1 : 0;
+    if (this.reducedMotion) {
+      this.blend = this.blendTarget;
+      this.renderStatic();
+    }
+  }
+
+  // Canal interno de la app: avance del scroll (parallax) + variante por sala.
+  setScene({ scroll = this.scrollOffset, seed = this.sceneSeed } = {}) {
+    if (seed !== this.sceneSeed) {
+      this.sceneSeed = seed;
+      this.cacheGradients(); // nuevas variantes de fondo por sala
+    }
+    this.scrollOffset = scroll;
     if (this.reducedMotion) this.renderStatic();
+  }
+
+  // Aleatorio determinista para las variantes de escena
+  prand(i) {
+    const f = Math.sin(i * 127.1 + this.sceneSeed * 311.7) * 43758.5453;
+    return f - Math.floor(f);
   }
 
   resize() {
@@ -205,7 +229,7 @@ export class MundoCaverna {
     this.cacheGradients();
   }
 
-  // Los gradientes de fondo solo cambian con el tamaño: se cachean
+  // Los gradientes de fondo cambian con tamaño y variante (sala); se cachean
   cacheGradients() {
     this._gradKey = null;
     this._gradCueva = null;
@@ -215,7 +239,12 @@ export class MundoCaverna {
     const w = this.width;
     const h = this.height;
 
-    const cupula = ctx.createRadialGradient(w * 0.5, h * 0.2, 50, w * 0.5, h * 0.2, Math.max(w, h));
+    const p = (i) => this.prand(i);
+
+    // Cueva: el centro del túnel varía por sala
+    const cupX = w * (0.35 + p(1) * 0.3);
+    const cupY = h * 0.2;
+    const cupula = ctx.createRadialGradient(cupX, cupY, 50, cupX, cupY, Math.max(w, h));
     cupula.addColorStop(0, '#0b2e2a');
     cupula.addColorStop(0.4, '#0a1f18');
     cupula.addColorStop(1, '#040a08');
@@ -226,13 +255,23 @@ export class MundoCaverna {
     jardin.addColorStop(1, '#fefcf7');
     this._bgJardin = jardin;
 
-    const sunX = w * 0.8;
-    const sunY = h * 0.22;
+    // Jardín: el sol nace en un lugar distinto por sala
+    this._sunX = w * (0.65 + p(2) * 0.3);
+    this._sunY = h * (0.14 + p(3) * 0.12);
+    const sunX = this._sunX;
+    const sunY = this._sunY;
     const radial = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, 220);
     radial.addColorStop(0, 'rgba(255,240,200,0.9)');
     radial.addColorStop(0.2, 'rgba(255,220,160,0.5)');
     radial.addColorStop(1, 'rgba(255,220,160,0)');
     this._sunGlow = radial;
+  }
+
+  // Desplazamiento con repetición: factor por capa (distantes lentos, cercanos rápidos)
+  modX(x, w, factor = 1) {
+    let px = x - (this.reducedMotion ? 0 : this.scrollOffset * factor);
+    px = ((px % w) + w) % w;
+    return px;
   }
 
   torchGradient(lx, ly, jardin) {
@@ -260,6 +299,7 @@ export class MundoCaverna {
     const dt = Math.min(0.05, (now - this.lastTime) / 1000);
     this.lastTime = now;
     this.t += dt;
+    this.blend += (this.blendTarget - this.blend) * Math.min(1, dt * 2.5); // amanecer ~1s
     this.draw();
     this.rafId = requestAnimationFrame(this.loop);
   }
@@ -267,20 +307,24 @@ export class MundoCaverna {
   draw() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
-    if (this.mode === 'cueva') this.drawCueva();
-    else this.drawJardin();
+    const b = this.blend;
+    if (b < 0.99) this.drawCueva(b);
+    if (b > 0.01) this.drawJardin(b);
   }
 
-  drawCueva() {
+  drawCueva(b = 1) {
     const ctx = this.ctx;
     const w = this.width;
     const h = this.height;
+    const cueva = 1 - b; // peso de la cueva: se apaga mientras amanece
+    if (cueva <= 0.01) return;
 
     const g = this._bgCueva;
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
 
-    const lx = this.mx * w;
+    // Antorcha: sigue el mouse pero cada sala la coloca con un sesgo propio
+    const lx = Math.min(Math.max(this.mx + (this.prand(7) - 0.5) * 0.3, 0.03), 0.97) * w;
     const ly = this.my * h;
     const ox = (this.mx - 0.5) * 20;
     const oy = (this.my - 0.5) * 20;
@@ -290,13 +334,14 @@ export class MundoCaverna {
 
     this.stars.forEach((s) => {
       s.a += s.tw;
+      const px = this.modX(s.x, w, 0.015); // capas lejanas: casi fijas
       const baseAlpha = 0.4 + Math.sin(s.a) * 0.5;
-      const d = Math.hypot(s.x - lx + ox, s.y - ly + oy);
+      const d = Math.hypot(px - lx + ox, s.y - ly + oy);
       const fall = Math.max(0, 1 - d / TORCH_RADIUS);
-      ctx.globalAlpha = Math.min(1, baseAlpha + fall * STAR_BOOST);
+      ctx.globalAlpha = Math.min(1, baseAlpha + fall * STAR_BOOST) * cueva;
       ctx.fillStyle = '#c9a45a';
       ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.arc(px, s.y, s.r, 0, Math.PI * 2);
       ctx.fill();
     });
     ctx.globalAlpha = 1;
@@ -304,15 +349,18 @@ export class MundoCaverna {
     this.dust.forEach((d) => {
       d.y += d.v;
       if (d.y > h) { d.y = 0; d.x = Math.random() * w; }
-      ctx.fillStyle = 'rgba(255,255,255,0.04)';
-      ctx.fillRect(d.x, d.y, d.s, d.s);
+      const px = this.modX(d.x, w, 0.05); // capa media
+      ctx.globalAlpha = 0.04 * cueva;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(px, d.y, d.s, d.s);
     });
+    ctx.globalAlpha = 1;
 
-    const drawRocks = (rocks, alphaBase, para) => {
-      ctx.globalAlpha = alphaBase;
+    const drawRocks = (rocks, alphaBase, para, factor) => {
+      ctx.globalAlpha = alphaBase * cueva;
       ctx.fillStyle = '#0a1a14';
       rocks.forEach((r) => {
-        const px = r.x + (this.mx - 0.5) * para * 10;
+        const px = this.modX(r.x, w, factor); // la piedra camina contigo
         const py = r.y + (this.my - 0.5) * para * 6;
         ctx.beginPath();
         ctx.ellipse(px, py, r.w, r.h, 0, 0, Math.PI * 2);
@@ -320,40 +368,45 @@ export class MundoCaverna {
       });
       ctx.globalAlpha = 1;
     };
-    drawRocks(this.rocksFar, 0.18, 0.4);
-    drawRocks(this.rocksNear, 0.32, 0.8);
+    drawRocks(this.rocksFar, 0.18, 0.4, 0.03);
+    drawRocks(this.rocksNear, 0.32, 0.8, 0.08);
 
     ctx.fillStyle = '#a8c07a';
     this.glyphs.forEach((gc) => {
-      const d = Math.hypot(gc.x - lx + ox, gc.y - ly + oy);
+      const px = this.modX(gc.x, w, 0.14); // capa cercana: corre
+      const d = Math.hypot(px - lx + ox, gc.y - ly + oy);
       const fall = Math.max(0, 1 - d / TORCH_RADIUS);
       const baseAlpha = 0.35 + Math.sin(this.t * 0.8 + gc.a) * 0.15;
-      ctx.globalAlpha = Math.min(1, baseAlpha + fall * GLYPH_BOOST);
+      ctx.globalAlpha = Math.min(1, baseAlpha + fall * GLYPH_BOOST) * cueva;
       ctx.font = `bold ${gc.s}px monospace`;
-      ctx.fillText(gc.ch, gc.x, gc.y);
+      ctx.fillText(gc.ch, px, gc.y);
     });
     ctx.globalAlpha = 1;
     ctx.restore();
 
     ctx.globalCompositeOperation = 'screen';
+    ctx.globalAlpha = cueva;
     ctx.fillStyle = this.torchGradient(lx, ly, false);
     ctx.beginPath();
     ctx.arc(lx, ly, TORCH_RADIUS + TORCH_SOFTNESS, 0, Math.PI * 2);
     ctx.fill();
+    ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  drawJardin() {
+  drawJardin(b = 1) {
     const ctx = this.ctx;
     const w = this.width;
     const h = this.height;
+    if (b <= 0.01) return;
 
+    ctx.globalAlpha = b;
     const g = this._bgJardin;
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
 
-    const sunX = w * 0.8;
-    const sunY = h * 0.22;
+    const sunX = this._sunX;
+    const sunY = this._sunY;
     ctx.fillStyle = this._sunGlow;
     ctx.beginPath();
     ctx.arc(sunX, sunY, 220, 0, Math.PI * 2);
@@ -363,29 +416,34 @@ export class MundoCaverna {
     ctx.beginPath();
     ctx.arc(sunX, sunY, 70, 0, Math.PI * 2);
     ctx.fill();
+    ctx.globalAlpha = 1;
 
     const ox = (this.mx - 0.5) * 15;
     const oy = (this.my - 0.5) * 15;
     ctx.save();
     ctx.translate(ox, oy);
+    ctx.globalAlpha = b;
 
     this.pollen.forEach((p) => {
       p.y += p.v;
       if (p.y > h) { p.y = 0; p.x = Math.random() * w; }
+      const px = this.modX(p.x, w, 0.06);
       ctx.fillStyle = 'rgba(176,138,58,0.55)';
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2);
+      ctx.arc(px, p.y, p.s, 0, Math.PI * 2);
       ctx.fill();
     });
     ctx.restore();
+    ctx.globalAlpha = b;
 
     this.hills.forEach((hill, i) => {
-      ctx.globalAlpha = 0.18 + i * 0.08;
+      ctx.globalAlpha = (0.18 + i * 0.08) * b;
       ctx.fillStyle = i === 0 ? '#7a8f4a' : '#5c6f35';
       ctx.beginPath();
       ctx.moveTo(0, h);
       for (let x = 0; x <= w; x += 20) {
-        const y = hill.y + Math.sin((x * 0.01) + this.t * 0.3 + hill.phase) * hill.amp;
+        // los perfiles caminan con el scroll: sensación de avanzar por el jardín
+        const y = hill.y + Math.sin((x * 0.01) + this.t * 0.3 + hill.phase + (this.reducedMotion ? 0 : this.scrollOffset * 0.0004)) * hill.amp;
         ctx.lineTo(x, y);
       }
       ctx.lineTo(w, h);
@@ -397,10 +455,12 @@ export class MundoCaverna {
     const lx = this.mx * w;
     const ly = this.my * h;
     ctx.globalCompositeOperation = 'screen';
+    ctx.globalAlpha = b;
     ctx.fillStyle = this.torchGradient(lx, ly, true);
     ctx.beginPath();
     ctx.arc(lx, ly, TORCH_RADIUS + TORCH_SOFTNESS, 0, Math.PI * 2);
     ctx.fill();
+    ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }
 
@@ -408,6 +468,7 @@ export class MundoCaverna {
   renderStatic() {
     const prevT = this.t;
     this.t = 0.35;
+    this.blend = this.blendTarget;
     this.draw();
     this.t = prevT;
   }
