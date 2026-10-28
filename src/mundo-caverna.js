@@ -241,9 +241,9 @@ export class MundoCaverna {
 
     const p = (i) => this.prand(i);
 
-    // Cueva: el centro del túnel varía por sala
-    const cupX = w * (0.35 + p(1) * 0.3);
-    const cupY = h * 0.2;
+    // Cueva: el centro del túnel varía por sala (rango amplio: cada cueva se siente distinta)
+    const cupX = w * (0.25 + p(1) * 0.5);
+    const cupY = h * (0.1 + p(4) * 0.25);
     const cupula = ctx.createRadialGradient(cupX, cupY, 50, cupX, cupY, Math.max(w, h));
     cupula.addColorStop(0, '#0b2e2a');
     cupula.addColorStop(0.4, '#0a1f18');
@@ -255,9 +255,9 @@ export class MundoCaverna {
     jardin.addColorStop(1, '#fefcf7');
     this._bgJardin = jardin;
 
-    // Jardín: el sol nace en un lugar distinto por sala
-    this._sunX = w * (0.65 + p(2) * 0.3);
-    this._sunY = h * (0.14 + p(3) * 0.12);
+    // Jardín: el sol nace en un lugar bien distinto por sala
+    this._sunX = w * (0.5 + p(2) * 0.45);
+    this._sunY = h * (0.08 + p(3) * 0.22);
     const sunX = this._sunX;
     const sunY = this._sunY;
     const radial = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, 220);
@@ -323,8 +323,8 @@ export class MundoCaverna {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
 
-    // Antorcha: sigue el mouse pero cada sala la coloca con un sesgo propio
-    const lx = Math.min(Math.max(this.mx + (this.prand(7) - 0.5) * 0.3, 0.03), 0.97) * w;
+    // Antorcha: sigue el mouse pero cada sala la coloca con un sesgo propio (más marcado)
+    const lx = Math.min(Math.max(this.mx + (this.prand(7) - 0.5) * 0.5, 0.03), 0.97) * w;
     const ly = this.my * h;
     const ox = (this.mx - 0.5) * 20;
     const oy = (this.my - 0.5) * 20;

@@ -1,6 +1,7 @@
 export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaverna}) {
-  const tUI = () => textos[localStorage.getItem('portafolio-lang') || 'es'] || textos.es
-  const t = (obj) => (obj && (obj[localStorage.getItem('portafolio-lang') || 'es'] ?? obj.es)) || ''
+  const lang = () => localStorage.getItem('portafolio-lang') || 'es'
+  const tUI = () => textos[lang()] || textos.es
+  const t = (obj) => (obj && (obj[lang()] ?? obj.es)) || ''
 
   const el = (tag, attrs = {}, children = []) => {
     const node = document.createElement(tag)
@@ -20,6 +21,12 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
   // Tarjeta de proyecto (una sola vez; la usan las salas y los destacados de Home)
   const crearCard = (p) => {
     const card = el('article', {class:'project' + (p.destacado ? ' featured' : '')})
+    if (p.imagen) {
+      const media = el('div', {class:'project-media'})
+      const img = el('img', {src:p.imagen, alt:t(p.title), loading:'lazy', decoding:'async'})
+      media.appendChild(img)
+      card.appendChild(media)
+    }
     const body = el('div', {class:'project-body'})
     body.appendChild(el('span', {class:'tag', text:tUI().typeLabels[p.type] || p.type}))
     body.appendChild(el('h2', {text:t(p.title)}))
@@ -191,11 +198,16 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
   const progress = el('div', {class:'progress'})
   const progressBar = el('div', {class:'progress-bar'})
   progress.appendChild(progressBar)
+  progress.setAttribute('aria-hidden', 'true')
+
+  // Anuncio de sala para lectores de pantalla (B4)
+  const anuncio = el('p', {class:'sr-only', 'aria-live':'polite'})
   const salaContacto = salas.find(s=>s.id==='contacto')
   const contactoBtn = el('button', {class:'contacto-btn', text:t(salaContacto.titulo)})
   contactoBtn.addEventListener('click', ()=>goTo(salas.length-1))
   document.body.appendChild(progress)
   document.body.appendChild(contactoBtn)
+  document.body.appendChild(anuncio)
 
   // Parallax sutil de los títulos (se apaga con movimiento reducido)
   const salasEls = [...document.querySelectorAll('.room')]
@@ -210,6 +222,26 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       const sl = stage.scrollLeft           // una sola lectura de layout por frame
       const rw = roomW()
       const i = Math.round(sl / rw)
+
+      // A1: la URL sigue a la sala (sin tocar el scroll del documento)
+      if (i !== ultimaSala) {
+        ultimaSala = i
+        history.replaceState(null, '', `#/${salas[i].id}`)
+      }
+
+      // A1: la URL sigue a la sala (sin tocar el scroll del documento)
+      if (i !== ultimaSala) {
+        ultimaSala = i
+        history.replaceState(null, '', `#/${salas[i].id}`)
+        anuncio.textContent = tUI().roomOf.replace('{n}', String(i+1)).replace('{total}', String(salas.length)) + ': ' + t(salas[i].titulo)
+      }
+
+      document.querySelectorAll('.map-item').forEach((b,idx)=>{
+        const activo = idx===i
+        b.classList.toggle('active', activo)
+        b.setAttribute('aria-current', activo ? 'true' : 'false')
+      })
+
       if (mundo) {
         const sala = salas[i]
         const mode = sala.ambiente==='jardin' ? 'jardin' : 'cueva'
@@ -217,10 +249,6 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
         // Fondo vivo: parallax por capas + variante por sala
         if (mundo.setScene) mundo.setScene({scroll: sl, seed: i})
       }
-      document.querySelectorAll('.map-item').forEach((b,idx)=>{
-        b.classList.toggle('active', idx===i)
-      })
-
       // Progreso: cálculo puro, sin leer layout
       progressBar.style.width = `${(sl / Math.max(1, maxScroll())) * 100}%`
       contactoBtn.classList.toggle('oculto', i === salas.length - 1)
@@ -230,7 +258,7 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
         headEls.forEach((head, idx)=>{
           const off = (idx * rw + rw/2 - sl) / rw
           head.style.transform = `translateX(${off * -6}%)`
-          head.style.opacity = String(Math.max(0.25, 1 - Math.abs(off) * 1.4))
+          head.style.opacity = String(Math.max(0.45, 1 - Math.abs(off) * 1.4))
         })
       }
       ticking = false
@@ -246,10 +274,11 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
   }, {passive:false})
 
   // Teclas
-  window.addEventListener('keydown', (e)=>{
+  const onKey = (e)=>{
     if (e.key==='ArrowRight') goTo(Math.min(salas.length-1, currentIndex()+1))
     if (e.key==='ArrowLeft') goTo(Math.max(0, currentIndex()-1))
-  })
+  }
+  window.addEventListener('keydown', onKey)
 
   // Resize mundo con debounce rAF
   let resizeRAF = false
@@ -263,6 +292,34 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
   })
   ro.observe(document.body)
 
+  // ── A1: enlaces por sala ──
+  // Al cargar: si hay hash (#/apps), aterrizar directo en esa sala
+  const salaIndexFromHash = ()=>{
+    const id = (location.hash || '').replace(/^#\/?/, '')
+    const i = salas.findIndex(s=>s.id===id)
+    return i >= 0 ? i : -1
+  }
+  const inicial = salaIndexFromHash()
+  if (inicial > 0) {
+    stage.scrollLeft = inicial * roomW()          // salto directo, sin animación
+    if (mundo) {
+      const sala = salas[inicial]
+      mundo.setMode(sala.ambiente==='jardin' ? 'jardin' : 'cueva')
+      if (mundo.setScene) mundo.setScene({scroll: stage.scrollLeft, seed: inicial})
+    }
+  }
+
   // Exponer
+  let ultimaSala = inicial
   window.__recorrido = {goTo, currentIndex}
+
+  // Destructor para repintar (cambio de idioma sin recarga)
+  const destroy = ()=>{
+    mundo && mundo.destroy()
+    ro.disconnect()
+    window.removeEventListener('keydown', onKey)
+    progress.remove(); contactoBtn.remove(); toast.remove(); canvas.remove(); anuncio.remove()
+    app.innerHTML = ''
+  }
+  return {destroy}
 }

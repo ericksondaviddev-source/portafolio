@@ -25,6 +25,14 @@ Estado de cada pieza. "Congelada" = no se toca sin permiso de Erickson.
 | Tipografía + tarjetas (P6.1) | `src/style.css` + `src/recorrido.js` + `src/main.js` | Aprobada 2026-10-27 | Space Grotesk + Inter locales (woff2), h1 editorial, tarjetas 340px+ con tag y botones Ver demo/WhatsApp |
 | Fondo vivo (P6.2) | `src/mundo-caverna.js` + `src/recorrido.js` | Aprobada 2026-10-27 | `setScene({scroll,seed})`: parallax por capas + variantes por sala; parallax de títulos matemático + `will-change` (58 FPS en vuelo, 60 estable) |
 | Destacados en Home | `src/recorrido.js` + `src/style.css` | Por aprobar (captura lista 2026-10-27) | 3 tarjetas destacado bajo el hero, reutiliza `crearCard`; falta el sí de Erickson |
+| Rutas por sala (A1) | `src/recorrido.js` | Aprobada 2026-10-28 | `#/landings`: aterriza, URL cambia con la sala; `prueba-rutas.mjs` verde |
+| Idioma sin recarga (A2) | `src/main.js` + `src/recorrido.js` | Aprobada 2026-10-28 | Repinta y conserva la sala; destroy limpio (canvas, observers, listeners) |
+| og para compartir (A3) | `scripts/gen-og.mjs` → `public/og-image.jpg` | Aprobada 2026-10-28 | 62 KB JPEG desde la sala real de la web |
+| Fuentes latino (B1) | `src/fonts.css` | Aprobada 2026-10-28 | Solo woff2 latinos: 9 archivos → 2, ~200 KB → ~71 KB |
+| Parallax legible (B2) | `src/recorrido.js` | Aprobada 2026-10-28 | Piso de opacidad 0.25 → 0.45 en vuelo |
+| Variantes marcadas (B3) | `src/mundo-caverna.js` | Aprobada 2026-10-28 | Cúpula, sol y antorcha varían fuerte por semilla de sala |
+| Accesibilidad del recorrido (B4) | `src/recorrido.js` | Aprobada 2026-10-28 | `aria-live` anuncia sala, `aria-current` en mapa |
+| Imagen en fichas (C1) | `src/recorrido.js` + `src/proyectos.js` | Listo, sin material | Campo `imagen` opcional; espera capturas de Erickson. Guía en `docs/datos.md` |
 
 ## Regla
 Cuando una pieza falla, se repara **esa** pieza. No se tocan las demás.
