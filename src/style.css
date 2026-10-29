@@ -682,6 +682,12 @@ footer {
   pointer-events: none;
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .contacto-btn {
+    display: none !important;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px; height: 1px;
@@ -706,6 +712,7 @@ footer {
 .proyectos-casa { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) }
 .proyectos-casa .project-body { padding: 20px 22px; gap: 10px }
 .proyectos-casa .project-body h2 { font-size: 20px }
+
 
 
 
