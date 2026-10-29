@@ -119,12 +119,12 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       room.appendChild(el('span', {class:'muted', text:tUI().footer}))
     } else if (sala.id==='home') {
       room.appendChild(el('p', {class:'room-sub', text:t(sala.resumen)}))
-      const story = el('div', {class:'home-story'})
-      story.appendChild(el('h3', {class:'home-promise', text:tUI().homePromise}))
-      story.appendChild(el('p', {class:'home-story-text', text:tUI().homeStory}))
-      const chips = el('div', {class:'home-chips'})
-      (tUI().homeChips || []).forEach(ch=> chips.appendChild(el('span', {class:'chip', text:ch})))
-      story.appendChild(chips)
+      const story = el('div', {class:'home-story'});
+      story.appendChild(el('h3', {class:'home-promise', text:tUI().homePromise}));
+      story.appendChild(el('p', {class:'home-story-text', text:tUI().homeStory}));
+      const chips = el('div', {class:'home-chips'});
+      (tUI().homeChips || []).forEach(ch=> chips.appendChild(el('span', {class:'chip', text:ch})));
+      story.appendChild(chips);
       room.appendChild(story)
       const accionesHome = el('div', {class:'home-actions'})
       const btnEntrar = el('button', {class:'btn wa-big', text:tUI().heroBtn})
