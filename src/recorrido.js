@@ -93,9 +93,13 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       head.appendChild(kicker)
     }
     head.appendChild(el('h1', {text:t(sala.titulo)}))
-    const hintRoom = el('div', {class:'swipe-hint-room'})
-    hintRoom.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>desliza</span>`
-    head.appendChild(hintRoom)
+    if (sala.id==='home') {
+      const hintRoom = el('div', {class:'swipe-hint-room'})
+      hintRoom.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>desliza</span>`
+      head.appendChild(hintRoom)
+      // Ocultar tras el primer desplazamiento horizontal
+      stage.addEventListener('scroll', ()=>{ hintRoom.style.display = 'none' }, {once:true})
+    }
     room.appendChild(head)
 
     if (sala.id==='contacto') {
@@ -170,6 +174,17 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
   btnNext.addEventListener('click', ()=> goTo(Math.min(salas.length-1, currentIndex()+1)))
   app.appendChild(btnPrev)
   app.appendChild(btnNext)
+
+  // Franja derecha para scroll horizontal en desktop
+  const stripe = el('div', {class:'scroll-stripe'})
+  stripe.innerHTML = `<div class=\"stripe-indicator\" aria-hidden=\"true\">⇅</div>`
+  app.appendChild(stripe)
+  stripe.addEventListener('wheel', (e)=>{
+    e.preventDefault()
+    e.stopPropagation()
+    const delta = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY
+    animarScroll(stage.scrollLeft + delta)
+  }, {passive:false})
 
   // Toast de copiado
   const toast = el('div', {class:'copy-toast'})

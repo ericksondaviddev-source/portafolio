@@ -1,0 +1,26 @@
+.scroll-stripe {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 56px;
+  height: 100vh;
+  z-index: 10;
+  display: none;
+  background: linear-gradient(to left, rgba(0,0,0,.35), transparent);
+  border-left: 1px solid rgba(247,201,72,.25);
+  pointer-events: auto;
+}
+.stripe-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  color: var(--gold);
+  font-size: 24px;
+  opacity: .85;
+  letter-spacing: .4em;
+  font-weight: 300;
+}
+@media (hover: hover) and (pointer: fine) {
+  .scroll-stripe { display: block; }
+}
