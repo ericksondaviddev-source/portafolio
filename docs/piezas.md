@@ -38,6 +38,10 @@ Estado de cada pieza. "Congelada" = no se toca sin permiso de Erickson.
 | Estándar ED-Dev | `~/.config/opencode/ESTANDAR-ED-DEV.md` + `AGENTS.md` | Activo 2026-10-28 | Fuente única con valores reales; línea en reglas globales |
 | Kit de arranque | `~/.config/opencode/plantilla-ed-dev/` | Activo 2026-10-28 | Portátil (no depende de este proyecto); "ED-Dev nuevo" lo copia |
 | Anuncio aria-live | `src/recorrido.js` + `scripts/prueba-rutas.mjs` | Reparada 2026-10-28 | Bug de bloque duplicado silenciaba el anuncio; aserción "Sala 5 de 7" añadida |
+| Publicación | GitHub + Vercel | En vivo 2026-10-29 | Repo `ericksondaviddev-source/portafolio` (público) → proyecto `eddev` → **https://eddev.vercel.app**. Deploy por Git push (`ed-dev.vercel.app` estaba tomado) |
+| Config de Vercel | `vercel.json` | Activa 2026-10-29 | Vite, `npm run build`, salida `dist/`; build remoto con verify-build incluido |
+| Parallax de títulos | `src/recorrido.js` + `scripts/prueba-parallax.mjs` | **Reparada 2026-10-29** | La fórmula olvidaba restar el centro del viewport → `off=0.5` en reposo → todos los títulos al suelo `.45` y −3% desplazados. Verificado local + producción (0.997 y 0 px) |
+| Prueba de parallax | `scripts/prueba-parallax.mjs` | Aprobada 2026-10-29 | Aserción dura: opacidad ≥ .95 y desplazamiento ≈ 0 en las 7 salas. Cubre lo que `check-ui` (estático) no puede ver |
 
 ## Regla
 Cuando una pieza falla, se repara **esa** pieza. No se tocan las demás.
