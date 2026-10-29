@@ -98,12 +98,13 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       const bloque = el('div', {class:'contacto'})
       bloque.appendChild(el('p', {text:tUI().contactoDesc}))
       const acciones = el('div', {class:'actions'})
-      const waHref = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(tUI().contactoPropuesta || '')}`
+      const waTexto = t(tUI().contactoPropuesta) || ''
+      const waHref = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(waTexto)}`
       acciones.appendChild(el('a', {class:'btn wa-big', href:waHref, target:'_blank', rel:'noopener', text:tUI().contactoWhatsApp}))
       const btnCopy = el('button', {class:'btn secondary', text:tUI().contactoCopy})
       btnCopy.addEventListener('click', async ()=>{
         try {
-          await navigator.clipboard.writeText(tUI().contactoPropuesta || '')
+          await navigator.clipboard.writeText(waTexto)
           mostrarToast(tUI().toastCopy)
         } catch { mostrarToast(tUI().toastCopyFail) }
       })
