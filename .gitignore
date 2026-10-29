@@ -15,8 +15,8 @@ dist-ssr
 # Referencias pesadas (31 MB) — archivadas, no versionadas
 99 ARCHIVO/referencias/
 
-# Evidencias pesadas regenerables
-02 LISTOS/**/*.mp4
+# Evidencias pesadas regenerables (capturas, videos, mockups)
+02 LISTOS/
 
 # Herramientas
 .playwright-mcp/
