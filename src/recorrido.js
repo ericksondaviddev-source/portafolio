@@ -71,9 +71,22 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
   salas.forEach((s,i)=>{
     const item = el('button', {class:'map-item', 'data-sala':s.id})
     item.innerHTML = `<span class="map-index">${String(i+1).padStart(2,'0')}</span><span class="map-label">${t(s.titulo)}</span>`
-    item.addEventListener('click', ()=> goTo(i))
+    item.addEventListener('click', ()=>{
+      goTo(i)
+      item.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'})
+    })
     mapInner.appendChild(item)
   })
+
+  // Indicador de swipe (solo móvil): aparece y se oculta tras el primer scroll
+  const hint = el('div', {class:'swipe-hint'})
+  hint.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16 15l-4-4-4 4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9h16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg><span>desliza</span>`
+  map.appendChild(hint)
+  let swipeVisible = true
+  mapInner.addEventListener('scroll', ()=>{
+    if (swipeVisible) { swipeVisible = false; hint.classList.remove('show') }
+  })
+  setTimeout(()=> hint.classList.add('show'), 900)
 
   // Construir salas
   salas.forEach((sala,idx)=>{

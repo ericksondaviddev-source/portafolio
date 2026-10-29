@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --font-display: "Space Grotesk Variable", "Inter Variable", system-ui, sans-serif;
   --font-text: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --bg: #050a08;
@@ -110,7 +110,7 @@ a { color: inherit; text-decoration: none }
 
 .skip-link:focus { top: 12px }
 
-/* Antorcha del cursor — solo transform, para que el navegador no recalcule el layout */
+/* Antorcha del cursor â€” solo transform, para que el navegador no recalcule el layout */
 #torch {
   position: fixed;
   inset: 0;
@@ -169,6 +169,8 @@ header {
   font: inherit;
   font-size: 13px;
   cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s ease, color .2s ease, transform .1s ease;
   transition: color .2s ease, background .2s ease, border-color .2s ease;
 }
 
@@ -377,6 +379,8 @@ main { display: block }
   font-size: 14px;
   border: 1px solid transparent;
   cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s ease, color .2s ease, transform .1s ease;
   transition: transform .15s ease, filter .15s ease;
 }
 
@@ -402,6 +406,8 @@ main { display: block }
   padding: 8px 12px;
   border-radius: 10px;
   cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s ease, color .2s ease, transform .1s ease;
   font-weight: 600;
 }
 
@@ -461,7 +467,7 @@ footer {
   -webkit-overflow-scrolling: touch;
 }
 /* En escritorio el snap lo maneja la inercia de recorrido.js: el snap CSS
-   de Chrome revierte los scrolls programáticos y pelea con el lerp. */
+   de Chrome revierte los scrolls programÃ¡ticos y pelea con el lerp. */
 @media (hover: hover) and (pointer: fine) {
   .stage { scroll-snap-type: none; }
 }
@@ -480,7 +486,7 @@ footer {
   position: relative;
   overflow-y: auto;
 }
-/* El canvas no cambia con prefers-color-scheme: cueva siempre oscura, jardín siempre claro.
+/* El canvas no cambia con prefers-color-scheme: cueva siempre oscura, jardÃ­n siempre claro.
    Los tokens de texto se fijan por ambiente para garantizar contraste en ambos. */
 .room[data-ambiente="cueva"] {
   color: var(--text);
@@ -533,28 +539,96 @@ footer {
 .home-actions { display: flex; gap: 12px; margin-top: 12px }
 .map {
   position: fixed;
-  left: 20px;
-  bottom: 20px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 10;
   display: flex;
-  gap: 6px;
+  align-items: center;
   background: var(--glass-strong);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 8px;
+  border-top: 1px solid var(--line);
+  padding: 6px max(8px, env(safe-area-inset-left)) max(10px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-right));
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow-x: hidden;
 }
+.map-inner {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-wrap: nowrap;
+  padding: 4px 0;
+}
+.map-inner::-webkit-scrollbar { display: none }
 .map-item {
+  flex: none;
+  scroll-snap-align: center;
   background: transparent;
   border: none;
   color: var(--muted);
   font-size: 12px;
-  padding: 6px 10px;
-  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  padding: 8px 14px;
+  border-radius: 10px;
   cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s ease, color .2s ease, transform .1s ease;
 }
-.map-item.active { color: var(--text); background: var(--glass); }
-.map-index { margin-right: 8px; opacity: .55 }
+.map-item:active { transform: scale(.94) }
+.map-item.active { color: #ffffff; background: linear-gradient(135deg, var(--accent1), var(--accent2)); box-shadow: var(--shadow); }
+.map-index { margin-right: 6px; opacity: .7; font-size: 11px }
+
+@media (hover: none) and (pointer: coarse) {
+  .map-item {
+    padding: 10px 16px;
+    font-size: 13px;
+    border-radius: 12px;
+    min-width: 85px;
+  }
+  .map-item.active {
+    box-shadow: 0 0 0 3px rgba(247, 201, 72, .4);
+  }
+}
+
+.swipe-hint {
+  position: absolute;
+  top: -28px;
+  right: 16px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  animation: swipe-bounce 2s infinite;
+  z-index: 15;
+}
+.swipe-hint.show { display: flex }
+.swipe-hint svg {
+  width: 24px;
+  height: 24px;
+  color: var(--gold);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
+}
+.swipe-hint span {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0,0,0,.4);
+}
+@keyframes swipe-bounce {
+  0%, 100% { transform: translateY(0) }
+  50% { transform: translateY(-4px) }
+}
+@media (hover: hover) and (pointer: fine) {
+  .swipe-hint { display: none !important }
+}
+
 .lang-btn {
   position: fixed;
   right: 20px;
@@ -566,6 +640,8 @@ footer {
   background: var(--glass);
   color: var(--text);
   cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s ease, color .2s ease, transform .1s ease;
 }
 .progress {
   position: fixed;
@@ -596,6 +672,8 @@ footer {
   color: var(--text);
   font-size: 13px;
   cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s ease, color .2s ease, transform .1s ease;
   transition: opacity .3s ease, transform .3s ease;
 }
 .contacto-btn.oculto {
@@ -628,4 +706,7 @@ footer {
 .proyectos-casa { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) }
 .proyectos-casa .project-body { padding: 20px 22px; gap: 10px }
 .proyectos-casa .project-body h2 { font-size: 20px }
+
+
+
 
