@@ -69,8 +69,8 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
   map.appendChild(mapInner)
 
   salas.forEach((s,i)=>{
-    const item = el('button', {class:'map-item', 'data-sala':s.id})
-    item.innerHTML = `<span class="map-index">${String(i+1).padStart(2,'0')}</span><span class="map-label">${t(s.titulo)}</span>`
+    const item = el('button', {class:'map-item', 'data-sala':s.id, 'aria-label':t(s.titulo)})
+    item.innerHTML = `<span class="map-label">${t(s.titulo)}</span>`
     item.addEventListener('click', ()=>{
       goTo(i)
       item.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'})
