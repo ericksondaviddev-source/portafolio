@@ -79,7 +79,17 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
   salas.forEach((sala,idx)=>{
     const room = el('section', {class:'room', 'data-sala':sala.id, 'data-ambiente':sala.ambiente})
     const head = el('div', {class:'room-head'})
-    head.appendChild(el('span', {class:'room-index', text:String(idx+1).padStart(2,'0')}))
+    if (sala.id==='home') {
+      // Firma de marca: signo + nombre (el número vive en el mapa de abajo)
+      const kicker = el('span', {class:'room-index'})
+      kicker.innerHTML = `<svg class="brand-sign" viewBox="0 0 64 64" width="22" height="22" aria-hidden="true" focusable="false">
+        <path d="M7 60 V31 A25 25 0 0 1 57 31 V60" fill="none" stroke="#f7c948" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="32" cy="40" r="10" fill="#f7c948"/>
+        <path d="M32 30 A10 10 0 0 1 32 50 Z" fill="#3ddc97"/>
+        <path d="M13 60 Q22.5 50 32 57 Q41.5 50 51 60 Z" fill="#3ddc97" opacity=".55"/>
+      </svg><span>${textos.brand || 'ED-Dev'}</span>`
+      head.appendChild(kicker)
+    }
     head.appendChild(el('h1', {text:t(sala.titulo)}))
     room.appendChild(head)
 
@@ -222,12 +232,6 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       const sl = stage.scrollLeft           // una sola lectura de layout por frame
       const rw = roomW()
       const i = Math.round(sl / rw)
-
-      // A1: la URL sigue a la sala (sin tocar el scroll del documento)
-      if (i !== ultimaSala) {
-        ultimaSala = i
-        history.replaceState(null, '', `#/${salas[i].id}`)
-      }
 
       // A1: la URL sigue a la sala (sin tocar el scroll del documento)
       if (i !== ultimaSala) {

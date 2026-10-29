@@ -27,6 +27,10 @@ await page.waitForTimeout(2400);
 const navegado = await sala();
 if (!navegado.hash.startsWith('#/libros')) fallos.push(`URL tras navegar = ${navegado.hash}, esperado #/libros`);
 
+// B4: el anuncio de sala para lectores de pantalla debe actualizarse
+const anuncio = await page.evaluate(() => document.querySelector('.sr-only[aria-live]')?.textContent || '');
+if (!anuncio.includes('Sala 5 de 7')) fallos.push(`anuncio aria-live = "${anuncio}", esperado "Sala 5 de 7 ..."`);
+
 // A2: cambiar idioma sin recarga y sin perder la sala
 let recargo = false;
 page.on('load', () => { recargo = true; });

@@ -33,6 +33,11 @@ Estado de cada pieza. "Congelada" = no se toca sin permiso de Erickson.
 | Variantes marcadas (B3) | `src/mundo-caverna.js` | Aprobada 2026-10-28 | Cúpula, sol y antorcha varían fuerte por semilla de sala |
 | Accesibilidad del recorrido (B4) | `src/recorrido.js` | Aprobada 2026-10-28 | `aria-live` anuncia sala, `aria-current` en mapa |
 | Imagen en fichas (C1) | `src/recorrido.js` + `src/proyectos.js` | Listo, sin material | Campo `imagen` opcional; espera capturas de Erickson. Guía en `docs/datos.md` |
+| Logo + favicon | `public/logo.svg`, `logo-claro.svg`, `favicon.svg` | Aprobada 2026-10-28 | Arco + sol partido gold/verde; 2 variantes (oscuro/claro), favicon 16 px legible; `mockup-logo.png` |
+| Kicker de marca | `src/recorrido.js` | Aprobada 2026-10-28 | Home firma "ED-Dev" + signo; números SOLO en el mapa; capturas 7 salas |
+| Estándar ED-Dev | `~/.config/opencode/ESTANDAR-ED-DEV.md` + `AGENTS.md` | Activo 2026-10-28 | Fuente única con valores reales; línea en reglas globales |
+| Kit de arranque | `~/.config/opencode/plantilla-ed-dev/` | Activo 2026-10-28 | Portátil (no depende de este proyecto); "ED-Dev nuevo" lo copia |
+| Anuncio aria-live | `src/recorrido.js` + `scripts/prueba-rutas.mjs` | Reparada 2026-10-28 | Bug de bloque duplicado silenciaba el anuncio; aserción "Sala 5 de 7" añadida |
 
 ## Regla
 Cuando una pieza falla, se repara **esa** pieza. No se tocan las demás.

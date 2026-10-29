@@ -517,14 +517,18 @@ footer {
   margin: 6px 0 16px;
 }
 .room-index {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .4em;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .35em;
   text-transform: uppercase;
   color: var(--accent2);
+  margin-bottom: 2px;
 }
+.room-index .brand-sign { flex: none }
 .room-sub { color: var(--muted); font-size: clamp(18px, 2vw, 22px); max-width: 58ch; line-height: 1.55 }
 .home-actions { display: flex; gap: 12px; margin-top: 12px }
 .map {
