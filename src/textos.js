@@ -12,6 +12,10 @@ export default {
     heroBtn: 'Entrar al recorrido',
     featuredTitle: 'Proyectos destacados',
 
+    homePromise: 'Webs, apps y videos que traen clientes.',
+    homeStory: 'Soy Erickson, desarrollador de La Guaira, Venezuela. Construyo herramientas digitales para negocios reales: se prueban en vivo, sin promesas vacías. Todo lo que hago termina en una conversación por WhatsApp, que es donde se cierra.',
+    homeChips: ['Webs que venden','Apps que resuelven','Videos que muestran'],
+
     landingsTitle: 'Landings',
     appsTitle: 'Apps / Juegos',
     musicaTitle: 'Música',
@@ -53,6 +57,10 @@ export default {
     heroDesc: 'Seven rooms to walk through: the cave where things get built, the garden where they rest, and the way out into the light to talk.',
     heroBtn: 'Enter the journey',
     featuredTitle: 'Featured projects',
+
+    homePromise: 'Websites, apps and videos that bring clients.',
+    homeStory: 'I am Erickson, developer from La Guaira, Venezuela. I build digital tools for real businesses: they are tested live, with no empty promises. Everything I do ends in a WhatsApp conversation, where the deal closes.',
+    homeChips: ['Websites that sell','Apps that solve','Videos that show'],
 
     landingsTitle: 'Landings',
     appsTitle: 'Apps / Games',

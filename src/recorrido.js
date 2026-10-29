@@ -77,17 +77,6 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
     })
     mapInner.appendChild(item)
   })
-
-  // Indicador de swipe (solo móvil): aparece y se oculta tras el primer scroll
-  const hint = el('div', {class:'swipe-hint'})
-  hint.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16 15l-4-4-4 4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9h16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg><span>desliza</span>`
-  map.appendChild(hint)
-  let swipeVisible = true
-  mapInner.addEventListener('scroll', ()=>{
-    if (swipeVisible) { swipeVisible = false; hint.classList.remove('show') }
-  })
-  setTimeout(()=> hint.classList.add('show'), 900)
-
   // Construir salas
   salas.forEach((sala,idx)=>{
     const room = el('section', {class:'room', 'data-sala':sala.id, 'data-ambiente':sala.ambiente})
@@ -104,6 +93,9 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       head.appendChild(kicker)
     }
     head.appendChild(el('h1', {text:t(sala.titulo)}))
+    const hintRoom = el('div', {class:'swipe-hint-room'})
+    hintRoom.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>desliza</span>`
+    head.appendChild(hintRoom)
     room.appendChild(head)
 
     if (sala.id==='contacto') {
@@ -123,11 +115,17 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       })
       acciones.appendChild(btnCopy)
       bloque.appendChild(acciones)
-      bloque.appendChild(el('span', {class:'muted', text:tUI().contactoHint}))
       room.appendChild(bloque)
       room.appendChild(el('span', {class:'muted', text:tUI().footer}))
     } else if (sala.id==='home') {
       room.appendChild(el('p', {class:'room-sub', text:t(sala.resumen)}))
+      const story = el('div', {class:'home-story'})
+      story.appendChild(el('h3', {class:'home-promise', text:tUI().homePromise}))
+      story.appendChild(el('p', {class:'home-story-text', text:tUI().homeStory}))
+      const chips = el('div', {class:'home-chips'})
+      (tUI().homeChips || []).forEach(ch=> chips.appendChild(el('span', {class:'chip', text:ch})))
+      story.appendChild(chips)
+      room.appendChild(story)
       const accionesHome = el('div', {class:'home-actions'})
       const btnEntrar = el('button', {class:'btn wa-big', text:tUI().heroBtn})
       btnEntrar.addEventListener('click', ()=>goTo(1))

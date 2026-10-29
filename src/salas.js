@@ -2,7 +2,7 @@ export default [
   {
     id: 'home',
     ambiente: 'cueva',
-    titulo: { es: 'Home', en: 'Home' },
+    titulo: { es: 'ED-Dev', en: 'ED-Dev' },
     resumen: { es: 'Portada y proyectos destacados.', en: 'Cover and featured projects.' }
   },
   {

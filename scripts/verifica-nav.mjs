@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch({headless:true, channel:'chromium'});
+const p = await b.newPage({viewport:{width:390,height:844}});
+await p.goto('https://eddev.vercel.app/#/contacto',{waitUntil:'networkidle'});
+await p.waitForTimeout(2000);
+const btn = await p.locator('text=Escríbeme por WhatsApp').first();
+const href = await btn.getAttribute('href');
+console.log('href:', href);
+console.log('tiene object?', href.includes('object'));
+await p.screenshot({path:'C:\\Users\\USUARIO\\Desktop\\Apps\\Proceso\\portafolio\\evidencia-movil-contacto.png'});
+await b.close();
