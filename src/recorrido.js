@@ -257,10 +257,15 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       progressBar.style.width = `${(sl / Math.max(1, maxScroll())) * 100}%`
       contactoBtn.classList.toggle('oculto', i === salas.length - 1)
 
-      // Parallax matemático: el centro de cada sala es predecible, cero rect reads
+      // Parallax matemático: el centro de sala es predecible, cero rect reads.
+      // Se compara contra el centro del viewport (sl + rw/2): en reposo da off=0
+      // y el título de la sala activo queda nítido y alineado. Sin restar el
+      // centro del viewport, en reposo off=0.5 SIEMPRE y todos los títulos
+      // caían al suelo de opacidad (.45) y se desplazaban -3% (verificado en
+      // producción 2026-10-29 con diagnostico-scroll.mjs).
       if (parallaxActivo) {
         headEls.forEach((head, idx)=>{
-          const off = (idx * rw + rw/2 - sl) / rw
+          const off = (idx * rw + rw/2 - (sl + rw/2)) / rw
           head.style.transform = `translateX(${off * -6}%)`
           head.style.opacity = String(Math.max(0.45, 1 - Math.abs(off) * 1.4))
         })
