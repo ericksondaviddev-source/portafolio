@@ -607,24 +607,24 @@ footer {
 .swipe-hint-room {
   display: none;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 10px;
   color: var(--gold);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   letter-spacing: .05em;
   text-transform: lowercase;
-  animation: swipe-slide 2s ease-in-out infinite;
+  animation: swipe-slide 1.6s ease-in-out infinite;
   pointer-events: none;
 }
 .swipe-hint-room svg {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   color: var(--gold);
 }
 @keyframes swipe-slide {
   0%, 100% { transform: translateX(0) }
-  50% { transform: translateX(6px) }
+  50% { transform: translateX(12px) }
 }
 @media (hover: none) and (pointer: coarse) {
   .swipe-hint-room { display: inline-flex }
@@ -724,3 +724,27 @@ footer {
 
 
 
+.nav-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 12;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--glass-strong);
+  color: var(--text);
+  font-size: 28px;
+  line-height: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.nav-arrow-prev { left: max(12px, env(safe-area-inset-left)); }
+.nav-arrow-next { right: max(12px, env(safe-area-inset-right)); }
+@media (hover: hover) and (pointer: fine) {
+  .nav-arrow { display: flex; }
+}

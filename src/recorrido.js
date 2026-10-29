@@ -118,7 +118,6 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       room.appendChild(bloque)
       room.appendChild(el('span', {class:'muted', text:tUI().footer}))
     } else if (sala.id==='home') {
-      room.appendChild(el('p', {class:'room-sub', text:t(sala.resumen)}))
       const story = el('div', {class:'home-story'});
       story.appendChild(el('h3', {class:'home-promise', text:tUI().homePromise}));
       story.appendChild(el('p', {class:'home-story-text', text:tUI().homeStory}));
@@ -161,6 +160,16 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
 
   app.appendChild(stage)
   app.appendChild(map)
+
+  // Flechas prev/next visibles en desktop
+  const btnPrev = el('button', {class:'nav-arrow nav-arrow-prev', 'aria-label':'Sala anterior'})
+  btnPrev.innerHTML = '‹'
+  const btnNext = el('button', {class:'nav-arrow nav-arrow-next', 'aria-label':'Sala siguiente'})
+  btnNext.innerHTML = '›'
+  btnPrev.addEventListener('click', ()=> goTo(Math.max(0, currentIndex()-1)))
+  btnNext.addEventListener('click', ()=> goTo(Math.min(salas.length-1, currentIndex()+1)))
+  app.appendChild(btnPrev)
+  app.appendChild(btnNext)
 
   // Toast de copiado
   const toast = el('div', {class:'copy-toast'})
@@ -288,10 +297,15 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
 
   // Wheel: vertical o lateral (trackpad), normalizado, siempre con inercia
   stage.addEventListener('wheel', (e)=>{
-    e.preventDefault()
-    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
-    const paso = e.deltaMode === 1 ? delta * 16 : e.deltaMode === 2 ? delta * roomW() : delta
-    animarScroll(targetScroll + paso)
+    const isHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey;
+    if (!isHorizontal) {
+      // dejar scroll vertical nativo de la sala
+      return;
+    }
+    e.preventDefault();
+    const delta = e.shiftKey ? e.deltaY : e.deltaX;
+    const paso = e.deltaMode === 1 ? delta * 16 : e.deltaMode === 2 ? delta * roomW() : delta;
+    animarScroll(targetScroll + paso);
   }, {passive:false})
 
   // Teclas

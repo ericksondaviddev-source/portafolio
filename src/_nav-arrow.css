@@ -1,0 +1,24 @@
+.nav-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 12;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--glass-strong);
+  color: var(--text);
+  font-size: 28px;
+  line-height: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.nav-arrow-prev { left: max(12px, env(safe-area-inset-left)); }
+.nav-arrow-next { right: max(12px, env(safe-area-inset-right)); }
+@media (hover: hover) and (pointer: fine) {
+  .nav-arrow { display: flex; }
+}
