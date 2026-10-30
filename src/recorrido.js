@@ -71,10 +71,12 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
   salas.forEach((s,i)=>{
     const item = el('button', {class:'map-item', 'data-sala':s.id, 'aria-label':t(s.titulo)})
     item.innerHTML = `<span class="map-label">${t(s.titulo)}</span>`
-    item.addEventListener('click', ()=>{
+    const activate = ()=>{
       goTo(i)
       item.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'})
-    })
+    }
+    item.addEventListener('click', activate)
+    item.addEventListener('touchend', (e)=>{ e.preventDefault(); activate() }, {passive:false})
     mapInner.appendChild(item)
   })
   // Construir salas
