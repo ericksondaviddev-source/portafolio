@@ -76,7 +76,6 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       item.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'})
     }
     item.addEventListener('click', activate)
-    item.addEventListener('touchend', (e)=>{ e.preventDefault(); activate() }, {passive:false})
     mapInner.appendChild(item)
   })
   // Construir salas
@@ -239,7 +238,11 @@ export function initRecorrido({app, salas, proyectos, textos, CONFIG, MundoCaver
       requestAnimationFrame(lerpScroll)
     }
   }
-  const goTo = (i)=> animarScroll(i * roomW())
+  const goTo = (i)=>{
+    const idx = Math.max(0, Math.min(i, salas.length - 1))
+    const left = idx * roomW()
+    stage.scrollTo({ left, behavior: 'smooth' })
+  }
   const currentIndex = ()=> Math.round(stage.scrollLeft / roomW())
 
   // Progreso arriba y botón de Contacto siempre a la mano
